@@ -9,12 +9,12 @@
 #define INCLUDE_HAL_LCD_LCD_INTERFACE_H_
 
 typedef enum{
-	ROW1=1,
+	ROW1,
 	ROW2
 }LCD_ROWS;
 
 typedef enum{
-	col1=1,
+	col1,
 	col2,
 	col3,
 	col4,

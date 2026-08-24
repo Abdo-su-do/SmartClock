@@ -4,7 +4,7 @@
  *  Created on: Aug 20, 2026
  *      Author: Abdullah
  */
-#include "../../LIB/BIT_MATH.h"
+#include "../../lib/BIT_MATH.h"
 #ifndef INCLUDE_HAL_LCD_LCD_PRIVATE_H_
 #define INCLUDE_HAL_LCD_LCD_PRIVATE_H_
 //MACROS HERE

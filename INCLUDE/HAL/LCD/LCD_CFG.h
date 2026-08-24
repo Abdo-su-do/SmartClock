@@ -18,8 +18,8 @@
 // 0 --> 1 Line
 // 1 --> 2 Line
 #define LCD_NO_OF_LINES 		1
-// 0 --> 8 BIT MODE
-// 1 --> 4 BIT MODE
+// 0 --> 4 BIT MODE
+// 1 --> 8 BIT MODE
 #define LCD_DL 1
 // 0 --> 5*7
 // 1 --> 5*10
@@ -32,7 +32,7 @@
 #define CURSOR_DISPLAY 			1
 // 0 --> off
 // 1 --> on
-#define CURSOR_BLINK 			1
+#define CURSOR_BLINK 			0
 //left to Right --> 1
 //Right to Left --> 0
 #define LCD_DATA_DIRECTION 		1

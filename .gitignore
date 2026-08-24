@@ -1,4 +1,25 @@
-# Eclipse / Atmel Studio build and local settings
+# Eclipse
+.metadata/
+.settings/
+.externalToolBuilders/
+*.launch
+
+# Build output
 Debug/
 Release/
-.settings/
+bin/
+obj/
+
+# C/C++ generated files
+*.o
+*.d
+*.elf
+*.map
+*.lst
+*.lss
+*.hex
+
+# Temporary files
+*.tmp
+*.bak
+*~
