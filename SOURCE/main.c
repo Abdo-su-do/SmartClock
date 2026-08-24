@@ -1,54 +1,36 @@
-/*
- * main.c
- *
- * Created on: Aug 23, 2026
- * Author: MALAH
- */
 
-#include <util/delay.h>
+#include "../INCLUDE/INCLUDES.h"
 
-#include "../INCLUDE/lib/STD_TYPES.h"
 
-#include "../INCLUDE/MCAL/DIO/DIO_INTERFACE.h"
+volatile u8 Global_u8LedState = DIO_LOW;
 
-#include "../INCLUDE/HAL/LCD/LCD_INTERFACE.h"
-#include "../INCLUDE/HAL/KEYPAD/KEYPAD_INTERFACE.h"
-
+void App_ToggleLED(void)
+{
+    if (Global_u8LedState == DIO_LOW)
+    {
+        MDIO_voidSetPinValue(PORTA, PIN0, DIO_HIGH);
+        Global_u8LedState = DIO_HIGH;
+    }
+    else
+    {
+        MDIO_voidSetPinValue(PORTA, PIN0, DIO_LOW);
+        Global_u8LedState = DIO_LOW;
+    }
+}
 
 int main(void)
 {
-    u8 Local_u8PressedKey;
+    MDIO_voidSetPinDirection(PORTA, PIN0, DIO_OUTPUT);
+    MDIO_voidSetPinDirection(PORTD, PIN2, DIO_INPUT);
+    MDIO_voidSetPinValue(PORTD, PIN2, DIO_HIGH);
 
+    MEXTI_voidConfig(EXTI0, FALLING);
+    MEXTI_voidSetCallBack(EXTI0, App_ToggleLED);
+    MEXTI_voidClearFlag(EXTI0);
+    MEXTI_voidEnable(EXTI0);
 
-    /*==================================================
-     *                  INITIALIZATION
-     *==================================================*/
+    MGI_voidEnable();
 
-    MDIO_voidInit();
-
-    HLCD_voidInit();
-
-    HKEPAD_voidInit();
-
-    HLCD_voidClearDisplay();
-
-
-    /*==================================================
-     *                  MAIN LOOP
-     *==================================================*/
-
-    while (1)
-    {
-        Local_u8PressedKey = HKEYPAD_u8GetPressedKey();
-
-
-        /*
-         * KEY_NOT_PRESSED = 0
-         */
-
-        if (Local_u8PressedKey != 0)
-        {
-            HLCD_voidSendData(Local_u8PressedKey);
-        }
-    }
+    while(1) { }
+    return 0;
 }
