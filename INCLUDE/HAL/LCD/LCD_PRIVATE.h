@@ -4,7 +4,7 @@
  *  Created on: Aug 20, 2026
  *      Author: Abdullah
  */
-#include "../../LIB/BIT_MATH.h"
+#include "../../lib/BIT_MATH.h"
 #ifndef INCLUDE_HAL_LCD_LCD_PRIVATE_H_
 #define INCLUDE_HAL_LCD_LCD_PRIVATE_H_
 //MACROS HERE
@@ -13,6 +13,6 @@
 #define DISPLAY_CLEAR    		0x01
 #define ENTRY_MODE_SET 			CONC_BIT(0,0,0,0,0,1,LCD_DATA_DIRECTION,LCD_SHIFT)
 
-#define LCD_ROW1_ADDRESS 127
-#define LCD_ROW2_ADDRESS 191
+#define LCD_ROW1_ADDRESS 0x80
+#define LCD_ROW2_ADDRESS 0xC0
 #endif /* INCLUDE_HAL_LCD_LCD_PRIVATE_H_ */
