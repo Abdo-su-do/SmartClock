@@ -41,7 +41,7 @@ typedef enum{
 	DIO_PULLUP
 }PIN_INPUT_MODE;
 
-void MDIO_voidInti();//M for mcal dio then the type
+void MDIO_voidInit();//M for mcal dio then the type
 void MDIO_voidSetPinDirection(DIO_PORTS A_DIOPORT, DIO_PINS A_DIOPIN,
 		PIN_DIRECTION A_DIODIRECTION);
 

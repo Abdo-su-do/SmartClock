@@ -5,18 +5,24 @@
 # Add inputs and outputs from these tool invocations to the build variables 
 C_SRCS += \
 ../SOURCE/DIO_PROGARM.c \
+../SOURCE/EXTI_PROGRAM.c \
+../SOURCE/GIE_PROGRAM.c \
 ../SOURCE/KEYPAD_PROGRAM.c \
 ../SOURCE/LCD_PROGRAM.c \
 ../SOURCE/main.c 
 
 OBJS += \
 ./SOURCE/DIO_PROGARM.o \
+./SOURCE/EXTI_PROGRAM.o \
+./SOURCE/GIE_PROGRAM.o \
 ./SOURCE/KEYPAD_PROGRAM.o \
 ./SOURCE/LCD_PROGRAM.o \
 ./SOURCE/main.o 
 
 C_DEPS += \
 ./SOURCE/DIO_PROGARM.d \
+./SOURCE/EXTI_PROGRAM.d \
+./SOURCE/GIE_PROGRAM.d \
 ./SOURCE/KEYPAD_PROGRAM.d \
 ./SOURCE/LCD_PROGRAM.d \
 ./SOURCE/main.d 
