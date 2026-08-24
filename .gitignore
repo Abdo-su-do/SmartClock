@@ -1,0 +1,4 @@
+# Eclipse / Atmel Studio build and local settings
+Debug/
+Release/
+.settings/
