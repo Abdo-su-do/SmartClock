@@ -1,36 +1,80 @@
+#include "../INCLUDE/LIB/STD_TYPES.h"
+#include "../INCLUDE/LIB/BIT_MATH.h"
 
-#include "../INCLUDE/INCLUDES.h"
+#include "../INCLUDE/MCAL/DIO/DIO_INTERFACE.h"
+#include "../INCLUDE/MCAL/ADC/ADC_INTERFACE.h"
+
+#include "../INCLUDE/HAL/LCD/LCD_INTERFACE.h"
+
+#include <util/delay.h>
 
 
-volatile u8 Global_u8LedState = DIO_LOW;
-
-void App_ToggleLED(void)
+static void APP_voidDisplayNumber(u16 A_u16Number)
 {
-    if (Global_u8LedState == DIO_LOW)
-    {
-        MDIO_voidSetPinValue(PORTA, PIN0, DIO_HIGH);
-        Global_u8LedState = DIO_HIGH;
-    }
-    else
-    {
-        MDIO_voidSetPinValue(PORTA, PIN0, DIO_LOW);
-        Global_u8LedState = DIO_LOW;
-    }
+    HLCD_voidSendData((A_u16Number / 1000) + '0');
+
+    A_u16Number %= 1000;
+
+    HLCD_voidSendData((A_u16Number / 100) + '0');
+
+    A_u16Number %= 100;
+
+    HLCD_voidSendData((A_u16Number / 10) + '0');
+
+    A_u16Number %= 10;
+
+    HLCD_voidSendData(A_u16Number + '0');
 }
+
 
 int main(void)
 {
-    MDIO_voidSetPinDirection(PORTA, PIN0, DIO_OUTPUT);
-    MDIO_voidSetPinDirection(PORTD, PIN2, DIO_INPUT);
-    MDIO_voidSetPinValue(PORTD, PIN2, DIO_HIGH);
+    u16 Local_u16ADCValue;
+    u8 Local_u8Channel;
 
-    MEXTI_voidConfig(EXTI0, FALLING);
-    MEXTI_voidSetCallBack(EXTI0, App_ToggleLED);
-    MEXTI_voidClearFlag(EXTI0);
-    MEXTI_voidEnable(EXTI0);
 
-    MGI_voidEnable();
+    MDIO_voidInit();
 
-    while(1) { }
-    return 0;
+    HLCD_voidInit();
+
+    MADC_voidInit();
+
+
+    while (1)
+    {
+        for (Local_u8Channel = ADC0;
+             Local_u8Channel <= ADC7;
+             Local_u8Channel++)
+        {
+            /* Read ADC value */
+            Local_u16ADCValue =
+                MADC_u16GetDigitalValue(
+                    (ADC_CHANNELS)Local_u8Channel
+                );
+
+
+            /* Display channel */
+            HLCD_voidClearDisplay();
+
+            HLCD_voidSendString((u8 *)"ADC");
+
+            HLCD_voidSendData(
+                Local_u8Channel + '0'
+            );
+
+
+            /* Display value */
+            HLCD_voidGoToPos(ROW2,col1);
+
+            HLCD_voidSendString((u8 *)"Value: ");
+
+            APP_voidDisplayNumber(
+                Local_u16ADCValue
+            );
+
+
+            /* Wait 2 seconds */
+            _delay_ms(2000);
+        }
+    }
 }

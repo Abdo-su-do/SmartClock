@@ -34,10 +34,8 @@
 #include "../INCLUDE/MCAL/EXTI/EXTI_PRIVATE.h"
 #include "../INCLUDE/MCAL/EXTI/EXTI_INTERFACE.h"
 #include "../INCLUDE/MCAL/EXTI/EXTI_CFG.h"
-
-// GIE directives
-#include "../INCLUDE/MCAL/GIE/GIE_PRIVATE.h"
-#include "../INCLUDE/MCAL/GIE/GIE_INTERFACE.h"
-#include "../INCLUDE/MCAL/GIE/GIE_CFG.h"
+#include "MCAL/GI/GI_CFG.h"
+#include "MCAL/GI/GI_INTERFACE.h"
+#include "MCAL/GI/GI_PRIVATE.h"
 
 #endif /* INCLUDE_INCLUDES_H_ */
