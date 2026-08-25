@@ -5,8 +5,7 @@
  *      Author: Abdullah
  */
 
-#ifndef SOURCE_ROTARY_PROGRAM_C_
-#define SOURCE_ROTARY_PROGRAM_C_
+
 
 /*
  * ROTARY_PROGRAM.c
@@ -79,4 +78,4 @@ static void HROTARY_voidInterruptHandler(void)
     }
 }
 
-#endif /* SOURCE_ROTARY_PROGRAM_C_ */
+ /* SOURCE_ROTARY_PROGRAM_C_ */

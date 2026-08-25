@@ -6,8 +6,8 @@
  */
 
 /* LIB */
-#include "../INCLUDE/LIB/BIT_MATH.h"
-#include "../INCLUDE/LIB/STD_TYPES.h"
+#include "../INCLUDE/lib/BIT_MATH.h"
+#include "../INCLUDE/lib/STD_TYPES.h"
 
 /* DIO */
 #include "../INCLUDE/MCAL/DIO/DIO_INTERFACE.h"

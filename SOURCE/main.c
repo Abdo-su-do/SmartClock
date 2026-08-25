@@ -1,80 +1,38 @@
-#include "../INCLUDE/LIB/STD_TYPES.h"
-#include "../INCLUDE/LIB/BIT_MATH.h"
-
+#include "../INCLUDE/lib/STD_TYPES.h"
+#include "../INCLUDE/lib/BIT_MATH.h"
 #include "../INCLUDE/MCAL/DIO/DIO_INTERFACE.h"
-#include "../INCLUDE/MCAL/ADC/ADC_INTERFACE.h"
+#include "../INCLUDE/MCAL/GI/GI_INTERFACE.h"
+#include "../INCLUDE/HAL/ROTARY/ROTARY_INTERFACE.h"
 
-#include "../INCLUDE/HAL/LCD/LCD_INTERFACE.h"
+s32 App_MenuIndex = 0;
 
-#include <util/delay.h>
-
-
-static void APP_voidDisplayNumber(u16 A_u16Number)
+void App_MenuScroll(ROTARY_DIRECTION Direction)
 {
-    HLCD_voidSendData((A_u16Number / 1000) + '0');
+    if (Direction == ROTARY_CW)
+    {
+        App_MenuIndex++; // Scroll Down
+    }
+    else if (Direction == ROTARY_CCW)
+    {
+        App_MenuIndex--; // Scroll Up
+    }
 
-    A_u16Number %= 1000;
-
-    HLCD_voidSendData((A_u16Number / 100) + '0');
-
-    A_u16Number %= 100;
-
-    HLCD_voidSendData((A_u16Number / 10) + '0');
-
-    A_u16Number %= 10;
-
-    HLCD_voidSendData(A_u16Number + '0');
+    // Output the raw number to PORTA!
+    MDIO_voidSetPortValue(PORTA, (u8)App_MenuIndex);
 }
-
 
 int main(void)
 {
-    u16 Local_u16ADCValue;
-    u8 Local_u8Channel;
+    // Set all of PORTA as output
+    MDIO_voidSetPortDirection(PORTA, 0xFF);
 
+    HROTARY_voidInit();
+    HROTARY_voidSetCallback(App_MenuScroll);
+    MGI_voidEnable();
 
-    MDIO_voidInit();
-
-    HLCD_voidInit();
-
-    MADC_voidInit();
-
-
-    while (1)
+    while(1)
     {
-        for (Local_u8Channel = ADC0;
-             Local_u8Channel <= ADC7;
-             Local_u8Channel++)
-        {
-            /* Read ADC value */
-            Local_u16ADCValue =
-                MADC_u16GetDigitalValue(
-                    (ADC_CHANNELS)Local_u8Channel
-                );
-
-
-            /* Display channel */
-            HLCD_voidClearDisplay();
-
-            HLCD_voidSendString((u8 *)"ADC");
-
-            HLCD_voidSendData(
-                Local_u8Channel + '0'
-            );
-
-
-            /* Display value */
-            HLCD_voidGoToPos(ROW2,col1);
-
-            HLCD_voidSendString((u8 *)"Value: ");
-
-            APP_voidDisplayNumber(
-                Local_u16ADCValue
-            );
-
-
-            /* Wait 2 seconds */
-            _delay_ms(2000);
-        }
+        // Waiting for the wheel to turn...
     }
+    return 0;
 }
