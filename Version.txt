@@ -1,0 +1,12 @@
+this version has
+
+DIO     tested      Abdo
+ADC     tested      Mallah
+EXTI    tested      Abdo
+GI      tested      Martin
+Keypad  tested      Abdo
+LCD     tested      fares(NEW VERSION)
+ROTTARY tested      Abdo
+
+main has a test code for all drivers
+check the protues file if you want to try...
