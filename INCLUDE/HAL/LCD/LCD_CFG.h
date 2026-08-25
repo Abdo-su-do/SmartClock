@@ -1,44 +1,73 @@
 /*
  * LCD_CFG.h
  *
- *  Created on: Aug 20, 2026
- *      Author: Abdullah
- */
-
-#ifndef INCLUDE_HAL_LCD_LCD_CFG_H_
-#define INCLUDE_HAL_LCD_LCD_CFG_H_
-
-#define LCD_DATA_PORT 			PORTD
-#define LCD_CONTROL_PORT    	PORTC
-
-#define LCD_RS_PIN 	        	PIN0
-#define LCD_RW_PIN 				PIN1
-#define LCD_E_PIN  				PIN2
-
-// 0 --> 1 Line
-// 1 --> 2 Line
-#define LCD_NO_OF_LINES 		1
-// 0 --> 4 BIT MODE
-// 1 --> 8 BIT MODE
-#define LCD_DL 1
-// 0 --> 5*7
-// 1 --> 5*10
-#define LCD_CHAR_FONT		 	0
-// 0 --> off
-// 1 --> on
-#define DISPLAY_ON 				1
-// 0 --> off
-// 1 --> on
-#define CURSOR_DISPLAY 			1
-// 0 --> off
-// 1 --> on
-#define CURSOR_BLINK 			0
-//left to Right --> 1
-//Right to Left --> 0
-#define LCD_DATA_DIRECTION 		1
-// 0 --> SHIFT ON
-// 1 --> SHIFT OFF
-#define LCD_SHIFT 				0
+ * Created: 8/23/2026 8:15:29 PM
+ *  Author: FaresKan
+ */ 
 
 
-#endif /* INCLUDE_HAL_LCD_LCD_CFG_H_ */
+#ifndef LCD_CFG_H_
+#define LCD_CFG_H_
+
+// Library Directives
+#include "../../LIB/STD_TYPES.h"
+#include "../../LIB/BIT_MATH.h"
+#include "../../MCAL/DIO/DIO_INTERFACE.h"
+
+#define LCD_RS_PIN   PIN0
+#define LCD_RS_PORT  PORTA
+
+#define LCD_RW_PIN   PIN1
+#define LCD_RW_PORT  PORTA
+
+#define LCD_E_PIN PIN2
+#define LCD_E_PORT	PORTA
+
+#define LCD_DATA_PORT PORTD
+
+
+#define LCD_MODE_8BIT        1
+#define LCD_MODE_4BIT        0
+#define LCD_MODE           LCD_MODE_8BIT
+
+#define LCD_NUM_L1        0
+#define LCD_NUM_L2        1
+#define LCD_NUM_LINES           LCD_NUM_L2
+
+#define LCD_CHARACTER_FONT_5_8         0
+#define LCD_CHARACTER_FONT_5_10        1
+#define LCD_CHARACTER_FONT           LCD_CHARACTER_FONT_5_8
+
+
+#define LCD_BACKLIGHT_ON     1
+#define LCD_BACKLIGHT_OFF    0
+#define LCD_BACKLIGHT    LCD_BACKLIGHT_ON
+
+#define LCD_CURSOR_ON     1
+#define LCD_CURSOR_OFF    0
+#define LCD_CURSOR    LCD_CURSOR_ON
+
+#define LCD_CURSORBLINK_ON     1
+#define LCD_CURSORBLINK_OFF    0
+#define LCD_CURSORBLINK    LCD_CURSORBLINK_OFF
+
+
+#define LCD_ID_INCREMENT   1
+#define LCD_ID_DECREMENT   0
+#define LCD_ID    LCD_ID_INCREMENT
+
+
+#define LCD_SHIFT_ON  1
+#define LCD_SHIFT_OFF   0
+#define LCD_SH    LCD_SHIFT_OFF
+
+/* LCD types */
+#define LCD_TYPE_16X2    0
+#define LCD_TYPE_16X4    1
+#define LCD_TYPE_20X4    2
+
+/* Select your LCD type */
+#define LCD_TYPE         LCD_TYPE_20X4
+
+
+#endif /* LCD_CFG_H_ */
