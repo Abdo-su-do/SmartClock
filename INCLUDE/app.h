@@ -3,7 +3,6 @@
 
 #include "../INCLUDE/lib/STD_TYPES.h"
 
-/* Public API */
 void APP_voidInit(void);
 void APP_voidUpdate(void);
 
