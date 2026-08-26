@@ -22,7 +22,7 @@
 #define LCD_E_PIN PIN2
 #define LCD_E_PORT	PORTA
 
-#define LCD_DATA_PORT PORTC
+#define LCD_DATA_PORT PORTD
 
 
 #define LCD_MODE_8BIT        1

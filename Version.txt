@@ -5,9 +5,11 @@ ADC     tested      Mallah
 EXTI    tested      Abdo
 GI      tested      Martin
 Keypad  tested      Abdo
-LCD     tested      fares(NEW VERSION)
+LCD     tested      Fares(NEW VERSION)
 ROTTARY tested      Abdo
 timer   tested      Martin
 eeprom  tested      Mallah
+I2C     tested      Ahmed & Fares
+RTC     tested      Ahmed & Fares
 
-main has a demo version 1.2 for project
+main has a commented demo project, also has test for i2c rtc. 

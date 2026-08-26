@@ -1,43 +1,3 @@
-/*
-
-#include "../INCLUDE/lib/STD_TYPES.h"
-#include "../INCLUDE/lib/BIT_MATH.h"
-#include "../INCLUDE/MCAL/DIO/DIO_INTERFACE.h"
-#include "../INCLUDE/MCAL/ADC/ADC_INTERFACE.h"
-#include "../INCLUDE/HAL/LCD/LCD_INTERFACE.h"
-#include "../INCLUDE/HAL/KEYPAD/KEYPAD_INTERFACE.h"
-#include "../INCLUDE/app.h"
-#include <util/delay.h>
-
-int main(void)
-{
-    
-    MDIO_voidInit();
-    HLCD_voidInit();
-    HKEPAD_voidInit();
-    // MEEPROM_voidInit() normally goes here 
-
-    // Splash Screen 
-    HLCD_voidClearDisplay();
-    HLCD_voidGoToPos(L2, C1);
-    HLCD_voidSendString((u8*)"  Smart Clock V2.1  ");
-    HLCD_voidGoToPos(L3, C1);
-    HLCD_voidSendString((u8*)"    20x4 Edition    ");
-    _delay_ms(1500);
-
-    
-    APP_voidInit();
-
-    while(1)
-    {
-        APP_voidUpdate();
-    }
-    return 0;
-}
-*/
-
-
-
 #include "../INCLUDE/lib/STD_TYPES.h"
 #include "../INCLUDE/lib/BIT_MATH.h"
 
@@ -58,7 +18,7 @@ static void PrintTwoDigit(u8 n) {
     HLCD_voidDisplayNumber(n);
 }
 
-int main(void)
+int mainAPP(void)
 {
     /* 1. Initialize DIO for LCD and I2C */
     MDIO_voidInit();
