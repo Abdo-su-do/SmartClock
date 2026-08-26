@@ -8,7 +8,6 @@
 #ifndef INCLUDE_HAL_KEYPAD_KEYPAD_CFG_H_
 #define INCLUDE_HAL_KEYPAD_KEYPAD_CFG_H_
 
-
 #define KEYPAD_PRESSED 0
 #define KEY_NOT_PRESSED 1
 
@@ -18,18 +17,15 @@
 #define Flag_DOWN 0
 #define Flag_UP   1
 
-
 #define KEYPAD_PORT PORTB
 
-
-
- //255 FOR ANALOG
-
+// ROWS (Outputs)
 #define ROW0 PIN0
 #define ROW1 PIN1
 #define ROW2 PIN2
 #define ROW3 PIN3
 
+// COLS (Inputs with Pull-up)
 #define COL0 PIN4
 #define COL1 PIN5
 #define COL2 PIN6

@@ -1,119 +1,130 @@
-/*
+#include "../INCLUDE/INCLUDES.h"
 
-#include "../INCLUDE/lib/STD_TYPES.h"
-#include "../INCLUDE/lib/BIT_MATH.h"
-#include "../INCLUDE/MCAL/DIO/DIO_INTERFACE.h"
-#include "../INCLUDE/MCAL/ADC/ADC_INTERFACE.h"
-#include "../INCLUDE/HAL/LCD/LCD_INTERFACE.h"
-#include "../INCLUDE/HAL/KEYPAD/KEYPAD_INTERFACE.h"
-#include "../INCLUDE/app.h"
-#include <util/delay.h>
+// Global Var
+u8 G_u8ScreenCounter = 0;
+u8 G_u8TempScreenCounter=0;
+u8 G_u8UserPresseKey = 'N';
+u16 G_u16TempRaw=0;
+u16 G_u16HumidRaw=0;
 
-int main(void)
-{
-    
-    MDIO_voidInit();
-    HLCD_voidInit();
-    HKEPAD_voidInit();
-    // MEEPROM_voidInit() normally goes here 
+#define KEY_OK '/'
+#define KEY_BACK '='
+#define KEY_NEXT '+'
+#define KEY_PREV '-'
+#define KEY_SETT '*'
 
-    // Splash Screen 
-    HLCD_voidClearDisplay();
-    HLCD_voidGoToPos(L2, C1);
-    HLCD_voidSendString((u8*)"  Smart Clock V2.1  ");
-    HLCD_voidGoToPos(L3, C1);
-    HLCD_voidSendString((u8*)"    20x4 Edition    ");
-    _delay_ms(1500);
-
-    
-    APP_voidInit();
-
-    while(1)
-    {
-        APP_voidUpdate();
-    }
-    return 0;
-}
-*/
+#define TIME_DATE_SCREEN   0
+#define TEMP_HUMID_SCREEN  1
+#define ALARM_SCREEN       2
+#define TIMER_SCREEN       3
+#define STOPWATCH_SCREEN   4
+#define POMODORRO_SCREEN   5
+#define SETTINGS_SCREEN    6
 
 
-
-#include "../INCLUDE/lib/STD_TYPES.h"
-#include "../INCLUDE/lib/BIT_MATH.h"
-
-#include "../INCLUDE/MCAL/DIO/DIO_INTERFACE.h"
-#include "../INCLUDE/MCAL/I2C/I2C_INTERFACE.h"
-#include "../INCLUDE/HAL/LCD/LCD_INTERFACE.h"
-#include "../INCLUDE/HAL/RTC/RTC_INTERFACE.h"
-#include <util/delay.h>
-
-/*
- * Standalone RTC & I2C test.
- * To use this, either rename main.c's main() to something else,
- * or exclude main.c from your build, and use this file instead.
- */
-
-static void PrintTwoDigit(u8 n) {
-    if (n < 10) HLCD_voidSendData('0');
-    HLCD_voidDisplayNumber(n);
-}
+#define MAX_SCREENS 1
 
 int main(void)
 {
-    /* 1. Initialize DIO for LCD and I2C */
-    MDIO_voidInit();
+    MDIO_voidInit();     
+    HLCD_voidInit();     
+    MI2C_voidInit();     
+    HRTC_voidInit();     
+    HKEPAD_voidInit();   
+    MADC_voidInit();
 
-    /* 2. Initialize LCD */
-    HLCD_voidInit();
+    RTC_DATE_TIME set_time;
+    set_time.Hours = 23;
+    set_time.Minutes = 59;
+    set_time.Seconds = 50;
+    set_time.ClockMode = RTC_MODE_24_HOUR;
+    set_time.Period = RTC_AM; /* Ignored in 24h mode */
+    set_time.Day = RTC_SUNDAY;
+    set_time.Date = 31;
+    set_time.Month = 12;
+    set_time.Year = 2026;
 
-    /* 3. Initialize I2C and RTC */
-    MI2C_voidInit();
-    HRTC_voidInit();
-
-    /* 4. Display Splash */
-    HLCD_voidClearDisplay();
-    HLCD_voidGoToPos(L1, C1);
-    HLCD_voidSendString((u8*)" I2C & RTC Test ");
-    _delay_ms(1000);
-
-    /* 5. Set an initial mock time: 23:59:50 */
-    RTC_DATE_TIME test_time;
-    test_time.Hours = 23;
-    test_time.Minutes = 59;
-    test_time.Seconds = 50;
-    test_time.ClockMode = RTC_MODE_24_HOUR;
-    test_time.Period = RTC_AM; /* Ignored in 24h mode */
-    test_time.Day = RTC_SUNDAY;
-    test_time.Date = 31;
-    test_time.Month = 12;
-    test_time.Year = 2026;
+    
 
     /* Write time to the RTC */
-    HRTC_voidSetDateTime(&test_time);
+    HRTC_voidSetDateTime(&set_time);
 
-    while(1)
+    HLCD_voidClearDisplay();
+    HLCD_voidGoToPos(L1, C1);
+    HLCD_voidSendString((u8*)" {v1.0} ");
+    _delay_ms(1000);
+    HLCD_voidClearDisplay();
+
+    while (1)
     {
-        /* Continuously read and display the time */
+        // reading time from rtc.
         RTC_DATE_TIME current_time;
         HRTC_voidGetDateTime(&current_time);
 
-        HLCD_voidGoToPos(L2, C1);
-        HLCD_voidSendString((u8*)"Time: ");
-        PrintTwoDigit(current_time.Hours); HLCD_voidSendData(':');
-        PrintTwoDigit(current_time.Minutes); HLCD_voidSendData(':');
-        PrintTwoDigit(current_time.Seconds);
-        HLCD_voidSendString((u8*)"   ");
+        G_u8UserPresseKey = HKEYPAD_u8GetPressedKey();
+        switch (G_u8UserPresseKey)
+        {
+        case KEY_NEXT:
+            G_u8ScreenCounter++;
+            if (G_u8ScreenCounter > MAX_SCREENS)
+            {
+                G_u8ScreenCounter = 0;
+            }
 
-        HLCD_voidGoToPos(L3, C1);
-        HLCD_voidSendString((u8*)"Date: ");
-        PrintTwoDigit(current_time.Date); HLCD_voidSendData('/');
-        PrintTwoDigit(current_time.Month); HLCD_voidSendData('/');
-        HLCD_voidDisplayNumber(current_time.Year);
-        HLCD_voidSendString((u8*)"   ");
+            break;
+        case KEY_PREV:
+            G_u8ScreenCounter--;
+            if (G_u8ScreenCounter < 0)
+            {
+                G_u8ScreenCounter = MAX_SCREENS;
+            }
+            break;
+        case KEY_SETT:
+            G_u8TempScreenCounter=G_u8ScreenCounter;
+            G_u8ScreenCounter=SETTINGS_SCREEN;
 
-        _delay_ms(500);
+            //callSettings(oldscreenCounter)
+            break;
+        default:
+            break;
+        }
+
+        switch (G_u8ScreenCounter)
+        {
+        case TIME_DATE_SCREEN:
+            HLCD_voidDisplayDateTime(current_time.Hours ,current_time.Minutes,
+                current_time.Seconds,current_time.Period,current_time.Day,
+                current_time.Date,current_time.Month,current_time.Year,
+                current_time.ClockMode);
+            break;
+        
+        case TEMP_HUMID_SCREEN:
+
+            G_u16TempRaw=MADC_u16GetDigitalValue(ADC0);
+            G_u16HumidRaw=MADC_u16GetDigitalValue(ADC1);
+            f32 L_f32Temp=((f32)G_u16TempRaw * 500.0f) / 1024.0f;
+            f32 L_f32Humid=((f32)G_u16HumidRaw * 100.0f) / 1023.0f;  
+            //edit this so esttings struct edit the temp unit.
+            HLCD_voidDisplayTempHumidity(L_f32Temp,L_f32Humid,LCD_TEMP_CELSIUS);
+
+            break;
+
+        case ALARM_SCREEN:
+            //CALL THE FUNC
+            break;
+        case TIMER_SCREEN:
+            //CALL THE FUNC
+            break;
+        case STOPWATCH_SCREEN:
+            //CALL THE FUNC
+            break;
+        case POMODORRO_SCREEN:
+            //CALL THE FUNC
+            break;
+        default:
+            break;
+        }
+
+
     }
-    
-    return 0;
 }
-

@@ -91,10 +91,10 @@ void HLCD_voidClearDisplay(void);
 void HLCD_voidDisplayNumber (u32 A_u32Number);
 void HLCD_voidGoToPos (LCD_ROWS A_LcdRowNo,LCD_COLS A_LcdColNo);
 
-/* //move to app layer
+//move to app layer
 void HLCD_voidDisplayDateTime(u8 A_u8Hours,u8 A_u8Minutes,u8 A_u8Seconds,LCD_CLOCK_PERIOD A_enuPeriod,LCD_DAYS A_enuDay,u8 A_u8Date,u8 A_u8Month,u16 A_u16Year,LCD_CLOCK_MODE A_enuMode);
 void HLCD_voidDisplayTempHumidity(f32 A_f32TemperatureCelsius,f32 A_f32Humidity,LCD_TEMP_UNIT A_TempUnit);
 void HLCD_voidDisplayPomodoro(u8 A_u8WorkMinutes,u8 A_u8WorkSeconds,u8 A_u8BreakMinutes,u8 A_u8BreakSeconds,LCD_POMODORO_STATUS A_Status);
 void HLCD_voidDisplayStopwatch(u8 A_u8Hours,u8 A_u8Minutes,u8 A_u8Seconds,LCD_STOPWATCH_STATUS A_Status);
-*/
+
 #endif /* INCLUDE_HAL_LCD_LCD_INTERFACE_H_ */
