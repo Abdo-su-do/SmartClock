@@ -8,6 +8,10 @@
 #ifndef INCLUDE_LIB_STD_TYPES_H_
 #define INCLUDE_LIB_STD_TYPES_H_
 
+#ifndef NULL
+#define NULL ((void *)0)
+#endif//new edit
+
 // number of size*8= ""
 
 typedef unsigned char  			 	 u8 ;   // 1 byte = 8 bits  u8

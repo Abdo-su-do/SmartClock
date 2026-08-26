@@ -7,6 +7,6 @@ GI      tested      Martin
 Keypad  tested      Abdo
 LCD     tested      fares(NEW VERSION)
 ROTTARY tested      Abdo
+timer      tested      Martin
 
-main has a test code for all drivers
-check the protues file if you want to try...
+main has a demo version 1.2 for project
