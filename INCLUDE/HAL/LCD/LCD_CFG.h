@@ -45,7 +45,7 @@
 
 #define LCD_CURSOR_ON     1
 #define LCD_CURSOR_OFF    0
-#define LCD_CURSOR    LCD_CURSOR_ON
+#define LCD_CURSOR    LCD_CURSOR_OFF
 
 #define LCD_CURSORBLINK_ON     1
 #define LCD_CURSORBLINK_OFF    0
