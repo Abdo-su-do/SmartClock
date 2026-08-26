@@ -7,6 +7,7 @@ GI      tested      Martin
 Keypad  tested      Abdo
 LCD     tested      fares(NEW VERSION)
 ROTTARY tested      Abdo
-timer      tested      Martin
+timer   tested      Martin
+eeprom  tested      Mallah
 
 main has a demo version 1.2 for project
