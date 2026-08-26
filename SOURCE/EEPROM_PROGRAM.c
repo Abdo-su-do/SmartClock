@@ -59,11 +59,12 @@ EEPROM_ErrorStatus MEEPROM_EEPROM_ErrorStatusWriteByte(u16 A_u16Address, u8 A_u8
     EEDR = A_u8Data;
 
 
-     // EEPROM Write Sequence
-
-    SET_BIT(EECR, EEMWE);
-
-    SET_BIT(EECR, EEWE);
+    // EEPROM Write Sequence (Must happen within 4 clock cycles)
+    // We use inline assembly to force the 'sbi' instruction, which takes exactly 2 cycles.
+    __asm__ __volatile__(
+        "sbi 0x1C, 2 \n\t"  // Set EEMWE (bit 2) in EECR (IO address 0x1C)
+        "sbi 0x1C, 1 \n\t"  // Set EEWE (bit 1) in EECR
+    );
 
      // Wait until EEPROM write completes
 

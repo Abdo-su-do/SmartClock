@@ -6,6 +6,9 @@
 #include "../INCLUDE/MCAL/EEPROM/EEPROM_INTERFACE.h"
 #include "../INCLUDE/MCAL/EEPROM/EEPROM_PRIVATE.h"
 
+#include "../INCLUDE/HAL/LCD/LCD_INTERFACE.h"
+
+
 
 #include "../INCLUDE/HAL/LCD/LCD_INTERFACE.h"
 
@@ -14,23 +17,48 @@
 
 int main(void)
 {
-	MDIO_voidInit();
-	HLCD_voidInit();
-	u8 data = 0;
+    /* 1. Initialize DIO and LCD */
+    MDIO_voidInit();
+    HLCD_voidInit();
 
-	MEEPROM_EEPROM_ErrorStatusWriteByte(0x0001, 'A');
+    /* 2. Clear Screen */
+    HLCD_voidClearDisplay();
+    HLCD_voidGoToPos(ROW1, col1);
+    HLCD_voidSendString((u8*)"Testing EEPROM...");
+    _delay_ms(1000);
 
-	MEEPROM_EEPROM_ErrorStatusReadByte(
-	    0x0000,
-	    &data
-	);
+    /* 3. Write data to EEPROM address 0x0010 */
+    u16 test_address = 0x0110;
+    u8 write_data = 'A';
+    u8 read_data = 0;
 
-	if(data == 'A')
-	{
-	    HLCD_voidSendString((u8*)"EEPROM OK");
-	}
-	else
-	{
-	    HLCD_voidSendString((u8*)"EEPROM ERROR");
-	}
+    MEEPROM_EEPROM_ErrorStatusWriteByte(test_address, write_data);
+
+    /* 4. Read back from the SAME address */
+    MEEPROM_EEPROM_ErrorStatusReadByte(test_address, &read_data);
+
+    /* 5. Display Result */
+    HLCD_voidClearDisplay();
+    HLCD_voidGoToPos(ROW1, col1);
+    if(read_data == write_data)
+    {
+        HLCD_voidSendString((u8*)"EEPROM OK!");
+        HLCD_voidGoToPos(ROW2, col1);
+        HLCD_voidSendString((u8*)"Data: ");
+        HLCD_voidSendData(read_data);
+    }
+    else
+    {
+        HLCD_voidSendString((u8*)"EEPROM ERROR");
+        HLCD_voidGoToPos(ROW2, col1);
+        HLCD_voidSendString((u8*)"Read: ");
+        HLCD_voidSendData(read_data);
+    }
+
+    /* 6. Infinite Loop so the MCU doesn't reset */
+    while(1)
+    {
+        
+    }
+    return 0;
 }
