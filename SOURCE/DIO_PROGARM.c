@@ -21,6 +21,10 @@
 
 void MDIO_voidInit(void)
 {
+    /* Disable JTAG to release PC2 (TCK), PC3 (TMS), PC4 (TDO), PC5 (TDI) for GPIO */
+    MCUCSR = (1 << JTD_BIT);
+    MCUCSR = (1 << JTD_BIT);
+
     /* Set Port Directions */
 
     DDRA_REG = CONC_BIT(

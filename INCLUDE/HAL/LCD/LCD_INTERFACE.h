@@ -76,18 +76,26 @@ typedef enum
 	LCD_POMODORO_OFF = 0,
 	LCD_POMODORO_ON
 } LCD_POMODORO_STATUS;
+
 typedef enum
 {
 	LCD_STOPWATCH_OFF = 0,
 	LCD_STOPWATCH_ON
 } LCD_STOPWATCH_STATUS;
 
+typedef enum
+{
+    LCD_TIMER_SETTING = 0,
+    LCD_TIMER_RUNNING,
+    LCD_TIMER_PAUSED,
+    LCD_TIMER_RINGING
+} LCD_TIMER_STATUS;
+
 void HLCD_voidSendCommand(u8 A_u8Command);
 void HLCD_voidSendData(u8 A_u8Command);
 void HLCD_voidInit(void);
 void HLCD_voidSendString(u8 *A_Pu8String);
 void HLCD_voidClearDisplay(void);
-//void HLCD_voidSendSpecialCharacter (u8 *A_pu8PatternArr, u8 A_u8PatternNumber,LCD_ROWS A_LcdRowNo,LCD_COLS A_LcdColNo );
 void HLCD_voidDisplayNumber (u32 A_u32Number);
 void HLCD_voidGoToPos (LCD_ROWS A_LcdRowNo,LCD_COLS A_LcdColNo);
 
@@ -96,5 +104,6 @@ void HLCD_voidDisplayDateTime(u8 A_u8Hours,u8 A_u8Minutes,u8 A_u8Seconds,LCD_CLO
 void HLCD_voidDisplayTempHumidity(f32 A_f32TemperatureCelsius,f32 A_f32Humidity,LCD_TEMP_UNIT A_TempUnit);
 void HLCD_voidDisplayPomodoro(u8 A_u8WorkMinutes,u8 A_u8WorkSeconds,u8 A_u8BreakMinutes,u8 A_u8BreakSeconds,LCD_POMODORO_STATUS A_Status);
 void HLCD_voidDisplayStopwatch(u8 A_u8Hours,u8 A_u8Minutes,u8 A_u8Seconds,LCD_STOPWATCH_STATUS A_Status);
+void HLCD_voidDisplayTimer(u8 A_u8Hours, u8 A_u8Minutes, u8 A_u8Seconds, LCD_TIMER_STATUS A_Status);
 
 #endif /* INCLUDE_HAL_LCD_LCD_INTERFACE_H_ */

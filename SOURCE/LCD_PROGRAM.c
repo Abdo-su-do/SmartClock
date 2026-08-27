@@ -566,3 +566,68 @@ void HLCD_voidDisplayStopwatch(u8 A_u8Hours,u8 A_u8Minutes,u8 A_u8Seconds,LCD_ST
 	HLCD_voidGoToPos(L4, C1);
 	HLCD_voidSendString((u8 *)"                    ");
 }
+
+/*========================================================
+ *                 DISPLAY TIMER SCREEN
+ *========================================================*/
+void HLCD_voidDisplayTimer(u8 A_u8Hours, u8 A_u8Minutes, u8 A_u8Seconds, LCD_TIMER_STATUS A_Status)
+{
+    /* 1. Validate Time */
+    if (A_u8Hours > 99)   A_u8Hours = 99;
+    if (A_u8Minutes > 59) A_u8Minutes = 59;
+    if (A_u8Seconds > 59) A_u8Seconds = 59;
+    /* 2. Line 1: Title */
+    HLCD_voidGoToPos(L1, C1);
+    HLCD_voidSendString((u8 *)"       TIMER        ");
+    /* 3. Line 2: Timer Value (HH:MM:SS) */
+    HLCD_voidGoToPos(L2, C1);
+    HLCD_voidSendString((u8 *)"Time: ");
+    HLCD_voidDisplayTwoDigits(A_u8Hours);
+    HLCD_voidSendData(':');
+    HLCD_voidDisplayTwoDigits(A_u8Minutes);
+    HLCD_voidSendData(':');
+    HLCD_voidDisplayTwoDigits(A_u8Seconds);
+    HLCD_voidSendString((u8 *)"      ");
+    /* 4. Line 3: Status */
+    HLCD_voidGoToPos(L3, C1);
+    switch (A_Status)
+    {
+        case LCD_TIMER_SETTING:
+            HLCD_voidSendString((u8 *)"Status: SETTING     ");
+            break;
+        case LCD_TIMER_RUNNING:
+            HLCD_voidSendString((u8 *)"Status: RUNNING     ");
+            break;
+        case LCD_TIMER_PAUSED:
+            HLCD_voidSendString((u8 *)"Status: PAUSED      ");
+            break;
+        case LCD_TIMER_RINGING:
+            HLCD_voidSendString((u8 *)"Status: TIME'S UP!  ");
+            break;
+        default:
+            HLCD_voidSendString((u8 *)"Status: OFF         ");
+            break;
+    }
+    /* 5. Line 4: Instructions */
+    HLCD_voidGoToPos(L4, C1);
+    if (A_Status == LCD_TIMER_SETTING)
+    {
+        HLCD_voidSendString((u8 *)"0-9:Set   /:Start   ");
+    }
+    else if (A_Status == LCD_TIMER_RUNNING)
+    {
+        HLCD_voidSendString((u8 *)"/:Pause   =:Cancel  ");
+    }
+    else if (A_Status == LCD_TIMER_PAUSED)
+    {
+        HLCD_voidSendString((u8 *)"/:Resume  =:Cancel  ");
+    }
+    else if (A_Status == LCD_TIMER_RINGING)
+    {
+        HLCD_voidSendString((u8 *)"Press Any Key...    ");
+    }
+    else
+    {
+        HLCD_voidSendString((u8 *)"                    ");
+    }
+}

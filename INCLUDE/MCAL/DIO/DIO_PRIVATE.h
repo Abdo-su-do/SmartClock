@@ -28,5 +28,7 @@
 #define DDRD_REG    (*(volatile u8 *) 0x31)
 #define PIND_REG    (*(volatile u8 *) 0x30)
 
+#define MCUCSR      (*(volatile u8 *) 0x54)
+#define JTD_BIT     7
 
 #endif /* INCLUDE_MCAL_DIO_DIO_PRIVATE_H_ */
