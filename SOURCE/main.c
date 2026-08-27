@@ -4,6 +4,10 @@
 s8 G_u8ScreenCounter = 0;
 s8 G_u8PrevScreenCounter = -1;
 s8 G_u8TempScreenCounter = 0;
+s8 G_u8SetScreenCounter = 0;
+s8 G_u8TempSetScreenCounter = 0;
+
+LCD_TEMP_UNIT G_tempUnit = LCD_TEMP_CELSIUS;
 u8 G_u8UserPresseKey = 'N';
 u16 G_u16TempRaw = 0;
 u16 G_u16HumidRaw = 0;
@@ -32,6 +36,7 @@ f32 G_f32Humid = 0;
 #define RINGING_SCREEN 9
 
 #define MAX_SCREENS 5
+#define SET_MAX_SCREENS 1
 
 int main(void)
 {
@@ -42,13 +47,12 @@ int main(void)
     HKEPAD_voidInit();
     MADC_voidInit();
     POMODORRO_voidInit();
-
     TIMER_APP_voidInit();
     STOPWATCH_APP_voidInit();
     MGI_voidEnable();
 
     RTC_DATE_TIME set_time;
-    set_time.Hours = 23;
+    set_time.Hours = 22;
     set_time.Minutes = 59;
     set_time.Seconds = 50;
     set_time.ClockMode = RTC_MODE_24_HOUR;
@@ -60,10 +64,11 @@ int main(void)
 
     /* Write time to the RTC */
     HRTC_voidSetDateTime(&set_time);
-
     HLCD_voidClearDisplay();
     HLCD_voidGoToPos(L1, C1);
-    HLCD_voidSendString((u8 *)" {v1.0} ");
+    HLCD_voidSendString((u8 *)"     Smart Watch    ");
+    HLCD_voidGoToPos(L3, C1);
+    HLCD_voidSendString((u8 *)"Loading.............");
     _delay_ms(1000);
     HLCD_voidClearDisplay();
 
@@ -93,27 +98,148 @@ int main(void)
             switch (G_u8UserPresseKey)
             {
             case KEY_NEXT:
-                G_u8ScreenCounter++;
-                if (G_u8ScreenCounter > MAX_SCREENS)
+                if (G_u8SetScreenCounter != SET_TIME_MODE && G_u8SetScreenCounter != SET_TIME_VALUE && G_u8SetScreenCounter != SET_DATE_VALUE)
                 {
-                    G_u8ScreenCounter = 0;
+                    if (G_u8ScreenCounter != SETTINGS_SCREEN)
+                    {
+                        G_u8ScreenCounter++;
+                        if (G_u8ScreenCounter > MAX_SCREENS)
+                        {
+                            G_u8ScreenCounter = 0;
+                        }
+                    }
+                    else
+                    {
+                        G_u8SetScreenCounter++;
+                        if (G_u8SetScreenCounter > SET_MAX_SCREENS)
+                        {
+                            G_u8SetScreenCounter = 0;
+                        }
+                    }
                 }
 
                 break;
             case KEY_PREV:
-                G_u8ScreenCounter--;
-                if (G_u8ScreenCounter < 0)
+                if (G_u8SetScreenCounter != SET_TIME_MODE && G_u8SetScreenCounter != SET_TIME_VALUE && G_u8SetScreenCounter != SET_DATE_VALUE)
                 {
-                    G_u8ScreenCounter = MAX_SCREENS;
+                    if (G_u8ScreenCounter != SETTINGS_SCREEN)
+                    {
+                        G_u8ScreenCounter--;
+                        if (G_u8ScreenCounter < 0)
+                        {
+                            G_u8ScreenCounter = MAX_SCREENS;
+                        }
+                    }
+                    else
+                    {
+                        G_u8SetScreenCounter--;
+                        if (G_u8SetScreenCounter < 0)
+                        {
+                            G_u8SetScreenCounter = SET_MAX_SCREENS;
+                        }
+                    }
                 }
                 break;
             case KEY_SETT:
-                if (G_u8ScreenCounter != POMODORRO_SCREEN)
+                /*if (G_u8ScreenCounter != POMODORRO_SCREEN)
                 {
                     G_u8TempScreenCounter = G_u8ScreenCounter;
                     G_u8ScreenCounter = SETTINGS_SCREEN;
+                }*/
+                if (G_u8ScreenCounter != SETTINGS_SCREEN)
+                {
+                    if (G_u8ScreenCounter != POMODORRO_SCREEN)
+                    {
+                        G_u8TempScreenCounter = G_u8ScreenCounter;
+                        G_u8ScreenCounter = SETTINGS_SCREEN;
+                    }
+                }
+                else
+                {
+                    G_u8ScreenCounter = G_u8TempScreenCounter;
+                } // this could be the ptoblem
+                break;
+
+            case '0':
+                break;
+            case '1':
+                if (G_u8ScreenCounter == SETTINGS_SCREEN)
+                {
+                    if (G_u8SetScreenCounter == SET_SCREEN1)
+                    {
+                        /* Enter the time-mode setting screen */
+                        G_u8SetScreenCounter = SET_TIME_MODE;
+                    }
+                    else if (G_u8SetScreenCounter == SET_TIME_MODE)
+                    {
+                        /* Select 24-hour mode and return */
+                        HRTC_voidSetClockMode(RTC_MODE_24_HOUR);
+                        G_u8SetScreenCounter = SET_SCREEN1;
+                    }
+                    else if (G_u8SetScreenCounter == SET_TEMP_UNIT)
+                    {
+                        G_tempUnit = LCD_TEMP_CELSIUS;
+                        G_u8SetScreenCounter = SET_SCREEN2;
+                    }
                 }
                 break;
+            case '2':
+                if (G_u8ScreenCounter == SETTINGS_SCREEN)
+                {
+                    if (G_u8SetScreenCounter == SET_SCREEN1)
+                    {
+                        /* Enter the time-mode setting screen */
+                        G_u8SetScreenCounter = SET_TIME_VALUE;
+                        G_u8UserPresseKey = '0';
+                    }
+                    else if (G_u8SetScreenCounter == SET_TIME_MODE)
+                    {
+                        /* Select 24-hour mode and return */
+                        HRTC_voidSetClockMode(RTC_MODE_12_HOUR);
+                        G_u8SetScreenCounter = SET_SCREEN1;
+                    }
+                    else if (G_u8SetScreenCounter == SET_TEMP_UNIT)
+                    {
+                        G_tempUnit = LCD_TEMP_FAHRENHEIT;
+                        G_u8SetScreenCounter = SET_SCREEN2;
+                    }
+                }
+                break;
+            case '3':
+                if (G_u8ScreenCounter == SETTINGS_SCREEN)
+                {
+                    if (G_u8SetScreenCounter == SET_SCREEN1)
+                    {
+                        /* Enter the time-mode setting screen */
+                        G_u8SetScreenCounter = SET_DATE_VALUE;
+                        G_u8UserPresseKey = '0';
+                    }
+                    else if (G_u8SetScreenCounter == SET_TEMP_UNIT)
+                    {
+                        G_tempUnit = LCD_TEMP_KELVIN;
+                        G_u8SetScreenCounter = SET_SCREEN2;
+                    }
+                }
+
+                break;
+            case '4':
+                if ((G_u8ScreenCounter == SETTINGS_SCREEN) &&
+                    (G_u8SetScreenCounter == SET_SCREEN2))
+                {
+                    G_u8SetScreenCounter = SET_TEMP_UNIT;
+                }
+                break;
+            case '5':
+                break;
+            case '6':
+                break;
+            case '7':
+                break;
+            case '8':
+                break;
+            case '9':
+                break;
+
             default:
                 break;
             }
@@ -135,7 +261,7 @@ int main(void)
             G_f32Temp = ((f32)G_u16TempRaw * 500.0f) / 1024.0f;
             G_f32Humid = ((f32)G_u16HumidRaw * 100.0f) / 1023.0f;
             // edit this so esttings struct edit the temp unit.
-            HLCD_voidDisplayTempHumidity(G_f32Temp, G_f32Humid, LCD_TEMP_CELSIUS);
+            HLCD_voidDisplayTempHumidity(G_f32Temp, G_f32Humid, G_tempUnit);
 
             break;
         case ALARM_SCREEN:
@@ -351,10 +477,38 @@ int main(void)
                 POMODORRO_voidHandleKeypadInput(G_u8UserPresseKey);
             }
 
-        	        POMODORRO_voidRender();
+            POMODORRO_voidRender();
 
-        	        break;
+            break;
         }
+
+        case SETTINGS_SCREEN:
+            switch (G_u8SetScreenCounter)
+            {
+            case SET_SCREEN1:
+                ASET_voidSetScreen1();
+                break;
+            case SET_SCREEN2:
+                ASET_voidSetScreen2();
+                break;
+
+            case SET_TIME_MODE:
+                ASET_voidSetScreenTimeMode();
+                break;
+            case SET_TIME_VALUE:
+                ASET_voidSetScreenTimeValue(G_u8UserPresseKey, &G_u8SetScreenCounter, current_time.ClockMode);
+                break;
+            case SET_DATE_VALUE:
+                ASET_voidSetScreenDateValue(G_u8UserPresseKey, &G_u8SetScreenCounter);
+                break;
+            case SET_TEMP_UNIT:
+                ASET_voidSetScreenTempUnit();
+                break;
+            default:
+                break;
+            }
+
+            break;
 
         default:
             break;

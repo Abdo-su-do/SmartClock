@@ -407,5 +407,6 @@ void HRTC_voidClearAlarmFlag(
  */
 void HRTC_voidDisableAllAlarms(void);
 
+void HRTC_voidSetClockMode(RTC_CLOCK_MODE A_enuNewMode);
 
 #endif /* INCLUDE_HAL_RTC_RTC_INTERFACE_H_ */
