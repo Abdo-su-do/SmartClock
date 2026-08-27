@@ -53,6 +53,9 @@ static void TIMER_APP_voidTimer0Callback(void)
                 G_u32StopwatchSeconds++;
             }
         }
+
+        /* Update Pomodoro countdown */
+        POMODORRO_voidUpdate();
     }
 }
 

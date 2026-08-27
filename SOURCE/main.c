@@ -31,7 +31,7 @@ f32 G_f32Humid = 0;
 #define SETTINGS_SCREEN 6
 #define RINGING_SCREEN 9
 
-#define MAX_SCREENS 4
+#define MAX_SCREENS 5
 
 int main(void)
 {
@@ -41,6 +41,7 @@ int main(void)
     HRTC_voidInit();
     HKEPAD_voidInit();
     MADC_voidInit();
+    POMODORRO_voidInit();
 
     TIMER_APP_voidInit();
     STOPWATCH_APP_voidInit();
@@ -107,10 +108,11 @@ int main(void)
                 }
                 break;
             case KEY_SETT:
-                G_u8TempScreenCounter = G_u8ScreenCounter;
-                G_u8ScreenCounter = SETTINGS_SCREEN;
-
-                // callSettings(oldscreenCounter)
+                if (G_u8ScreenCounter != POMODORRO_SCREEN)
+                {
+                    G_u8TempScreenCounter = G_u8ScreenCounter;
+                    G_u8ScreenCounter = SETTINGS_SCREEN;
+                }
                 break;
             default:
                 break;
@@ -343,8 +345,17 @@ int main(void)
             STOPWATCH_APP_voidUpdate(G_u8UserPresseKey);
             break;
         case POMODORRO_SCREEN:
-            // CALL THE FUNC
-            break;
+        {
+            if (G_u8UserPresseKey != 'N')
+            {
+                POMODORRO_voidHandleKeypadInput(G_u8UserPresseKey);
+            }
+
+        	        POMODORRO_voidRender();
+
+        	        break;
+        }
+
         default:
             break;
         }
