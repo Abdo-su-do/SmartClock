@@ -12,4 +12,12 @@
 
 void TIMER_APP_voidInit(void);
 void TIMER_APP_voidUpdate(u8 A_u8PressedKey);
+<<<<<<< Updated upstream
+=======
+
+/* Stopwatch Functions */
+void STOPWATCH_APP_voidInit(void);
+void STOPWATCH_APP_voidUpdate(u8 A_u8PressedKey);
+
+>>>>>>> Stashed changes
 #endif /* INCLUDE_TIMER_H_ */
