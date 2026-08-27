@@ -54,8 +54,8 @@ typedef enum
 
 typedef enum
 {
-	LCD_MODE_12_HOUR = 0,
-	LCD_MODE_24_HOUR
+	LCD_MODE_24_HOUR =0,
+	LCD_MODE_12_HOUR
 } LCD_CLOCK_MODE;
 
 typedef enum
