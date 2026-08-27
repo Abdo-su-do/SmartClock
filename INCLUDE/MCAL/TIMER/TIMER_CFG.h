@@ -26,7 +26,7 @@
  0b110 External clock source on T0 pin. Clock on falling edge.
  0b111 External clock source on T0 pin. Clock on rising edge.
 */
-#define TIMER0_CLK_CFG          0b010
+#define TIMER0_CLK_CFG          0b101
 
 /*
  NORMAL_DIO_PIN  0

@@ -11,6 +11,7 @@
 
 #include "../../lib/STD_TYPES.h"
 
+#define KEY_NOT_PRESSED 'N' //this was edited
 
 void HKEPAD_voidInit(void);
 u8 HKEYPAD_u8GetPressedKey(void);

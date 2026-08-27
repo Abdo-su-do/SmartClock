@@ -65,6 +65,8 @@
 #include "../INCLUDE/MCAL/TIMER/TIMER_CFG.h"
 
 
+#include "../INCLUDE/TIMER.h"
+
 
 
 

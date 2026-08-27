@@ -9,61 +9,49 @@
 #include "../INCLUDE/MCAL/TIMER/TIMER_INTERFACE.h"
 #include "../INCLUDE/MCAL/TIMER/TIMER_CFG.h"
 
-// Static Global Function Pointers to hold Callbacks
+#include <avr/interrupt.h>
+
 static void (*TIMER0_OVF_CALLBACK)(void) = NULL;
 static void (*TIMER0_CTC_CALLBACK)(void) = NULL;
 
 void MTIMER0_voidInit(void)
 {
 #if TIMER0_MODE == NORMAL_MODE
-    // Set wave generation to normal mode
     CLR_BIT(TCCR0, 3);
     CLR_BIT(TCCR0, 6);
 
-    // Turn on overflow interrupt
     SET_BIT(TIMSK, 0);
     CLR_BIT(TIMSK, 1);
 
-    // Start timer by setting its clock
     TCCR0 &= 0b11111000;
-    TCCR0 |= TIMER0_CLK_CFG;
 
 #elif TIMER0_MODE == CTC_MODE
-    // Set wave generation to CTC mode
     SET_BIT(TCCR0, 3);
     CLR_BIT(TCCR0, 6);
 
-    // Turn on CTC interrupt
     CLR_BIT(TIMSK, 0);
     SET_BIT(TIMSK, 1);
 
-    // Start timer by setting its clock & OC0 pin mode
     TCCR0 &= 0b11001000;
     TCCR0 |= (TIMER0_CLK_CFG | (TIMER0_CTC_OC0_PIN_MODE << 4));
 
 #elif TIMER0_MODE == FAST_PWM_MODE
-    // Set wave generation to Fast PWM mode (WGM00 = 1, WGM01 = 1)
     SET_BIT(TCCR0, 3);
     SET_BIT(TCCR0, 6);
 
-    // Disable interrupts for hardware PWM generation
     CLR_BIT(TIMSK, 0);
     CLR_BIT(TIMSK, 1);
 
-    // Set OC0 mode bits (COM00, COM01) & Clock Prescaler
     TCCR0 &= 0b11001000;
     TCCR0 |= (TIMER0_CLK_CFG | ((TIMER0_OC0_PIN_MODE & 0b11) << 4));
 
 #elif TIMER0_MODE == PHASE_CORRECT_MODE
-    // Set wave generation to Phase Correct PWM mode (WGM00 = 1, WGM01 = 0)
     CLR_BIT(TCCR0, 3);
     SET_BIT(TCCR0, 6);
 
-    // Disable interrupts for hardware PWM generation
     CLR_BIT(TIMSK, 0);
     CLR_BIT(TIMSK, 1);
 
-    // Set OC0 mode bits (COM00, COM01) & Clock Prescaler
     TCCR0 &= 0b11001000;
     TCCR0 |= (TIMER0_CLK_CFG | ((TIMER0_OC0_PIN_MODE & 0b11) << 4));
 
@@ -107,21 +95,16 @@ void MTIMER0_voidSetCTCCallback(void (*A_PtrToFunc)(void))
     }
 }
 
-/* ISR for Timer0 Overflow */
-void __vector_11(void) __attribute__((signal));
-void __vector_11(void)
+ISR(TIMER0_OVF_vect)
 {
-    if(TIMER0_OVF_CALLBACK != NULL)
+    if (TIMER0_OVF_CALLBACK != NULL)
     {
         TIMER0_OVF_CALLBACK();
     }
 }
-
-/* ISR for Timer0 Compare Match */
-void __vector_10(void) __attribute__((signal));
-void __vector_10(void)
+ISR(TIMER0_COMP_vect)
 {
-    if(TIMER0_CTC_CALLBACK != NULL)
+    if (TIMER0_CTC_CALLBACK != NULL)
     {
         TIMER0_CTC_CALLBACK();
     }

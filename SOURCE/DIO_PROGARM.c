@@ -22,6 +22,8 @@
 void MDIO_voidInit(void)
 {
     /* Set Port Directions */
+    MCUCSR = (1 << JTD_BIT);
+    MCUCSR = (1 << JTD_BIT);
 
     DDRA_REG = CONC_BIT(
         PORTA_PIN7_DIRECTION,
