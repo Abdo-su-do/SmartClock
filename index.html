@@ -1,0 +1,1798 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Advanced MCU Digital Watch & Environmental Station - NTI Project Deck</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;600;700&family=Outfit:wght@300;400;500;600;700;800;900&family=Cairo:wght@400;600;700;900&family=VT323&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    
+    <style>
+        :root {
+            --bg-dark: #0B1120;
+            --bg-card: rgba(15, 23, 42, 0.75);
+            --bg-card-hover: rgba(30, 41, 59, 0.85);
+            --border-card: rgba(255, 255, 255, 0.08);
+            
+            --primary-cyan: #00E5FF;
+            --primary-cyan-glow: rgba(0, 229, 255, 0.35);
+            --emerald-mint: #10B981;
+            --emerald-glow: rgba(16, 185, 129, 0.35);
+            --coral-red: #FF5252;
+            --coral-glow: rgba(255, 82, 82, 0.35);
+            --amber-gold: #FFB800;
+            --amber-glow: rgba(255, 184, 0, 0.35);
+            --vivid-purple: #A855F7;
+            --purple-glow: rgba(168, 85, 247, 0.35);
+            --blue-accent: #3B82F6;
+            
+            --text-primary: #F8FAFC;
+            --text-secondary: #94A3B8;
+            --text-muted: #64748B;
+            
+            --lcd-bg: #0d2818;
+            --lcd-text: #39ff14;
+            --lcd-text-dim: #1c7c0c;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            background-color: var(--bg-dark);
+            color: var(--text-primary);
+            font-family: 'Outfit', sans-serif;
+            overflow: hidden;
+            height: 100vh;
+            width: 100vw;
+            user-select: none;
+            background-image: 
+                radial-gradient(circle at 15% 15%, rgba(0, 229, 255, 0.08) 0%, transparent 40%),
+                radial-gradient(circle at 85% 85%, rgba(168, 85, 247, 0.08) 0%, transparent 40%),
+                radial-gradient(circle at 50% 50%, rgba(16, 185, 129, 0.04) 0%, transparent 60%),
+                linear-gradient(rgba(255, 255, 255, 0.02) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(255, 255, 255, 0.02) 1px, transparent 1px);
+            background-size: 100% 100%, 100% 100%, 100% 100%, 40px 40px, 40px 40px;
+        }
+
+        /* Top Header & HUD */
+        .deck-header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 60px;
+            padding: 0 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: rgba(11, 17, 32, 0.85);
+            backdrop-filter: blur(16px);
+            border-bottom: 1px solid var(--border-card);
+            z-index: 100;
+        }
+
+        .nti-badge {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .nti-logo-icon {
+            width: 36px;
+            height: 36px;
+            background: linear-gradient(135deg, var(--primary-cyan), var(--blue-accent));
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #0B1120;
+            font-weight: 900;
+            font-size: 18px;
+            box-shadow: 0 0 15px var(--primary-cyan-glow);
+        }
+
+        .nti-titles {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .nti-title-main {
+            font-weight: 800;
+            font-size: 0.95rem;
+            letter-spacing: 0.05em;
+            color: #FFFFFF;
+        }
+
+        .nti-subtitle {
+            font-size: 0.75rem;
+            color: var(--primary-cyan);
+            font-weight: 500;
+        }
+
+        .deck-status {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .tag-pill {
+            padding: 4px 12px;
+            border-radius: 999px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--border-card);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .tag-pill.cyan { border-color: var(--primary-cyan); color: var(--primary-cyan); }
+        .tag-pill.gold { border-color: var(--amber-gold); color: var(--amber-gold); }
+
+        .slide-counter {
+            font-family: 'Fira Code', monospace;
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            background: rgba(0, 0, 0, 0.4);
+            padding: 4px 10px;
+            border-radius: 6px;
+            border: 1px solid var(--border-card);
+        }
+
+        /* Slide Container */
+        .slides-wrapper {
+            position: relative;
+            width: 100vw;
+            height: calc(100vh - 60px - 60px);
+            margin-top: 60px;
+            overflow: hidden;
+        }
+
+        .slide {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            padding: 2.2rem 4rem;
+            display: flex;
+            flex-direction: column;
+            opacity: 0;
+            visibility: hidden;
+            transform: scale(0.96) translateY(20px);
+            transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+            overflow-y: auto;
+        }
+
+        .slide.active {
+            opacity: 1;
+            visibility: visible;
+            transform: scale(1) translateY(0);
+            z-index: 10;
+        }
+
+        /* Slide Header Typography */
+        .slide-head {
+            margin-bottom: 1.8rem;
+            position: relative;
+        }
+
+        .slide-category {
+            font-family: 'Fira Code', monospace;
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            letter-spacing: 0.15em;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 6px;
+        }
+
+        .slide-title {
+            font-size: 2.2rem;
+            font-weight: 800;
+            letter-spacing: -0.02em;
+            line-height: 1.15;
+            background: linear-gradient(135deg, #FFFFFF 30%, #CBD5E1 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .slide-subtitle {
+            font-size: 1rem;
+            color: var(--text-secondary);
+            margin-top: 4px;
+            font-weight: 400;
+        }
+
+        /* Card Layouts */
+        .grid-2 { display: grid; grid-template-columns: repeat(2, 1fr); gap: 1.5rem; }
+        .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.5rem; }
+        .grid-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1.2rem; }
+        .grid-5 { display: grid; grid-template-columns: repeat(5, 1fr); gap: 1rem; }
+        .grid-1-2 { display: grid; grid-template-columns: 1fr 2fr; gap: 1.5rem; }
+        .grid-2-1 { display: grid; grid-template-columns: 2fr 1fr; gap: 1.5rem; }
+        .grid-3-2 { display: grid; grid-template-columns: 3fr 2fr; gap: 1.5rem; }
+
+        .glass-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-card);
+            border-radius: 16px;
+            padding: 1.5rem;
+            backdrop-filter: blur(12px);
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .glass-card:hover {
+            border-color: rgba(255, 255, 255, 0.2);
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.5);
+        }
+
+        .glass-card.cyan { border-top: 3px solid var(--primary-cyan); }
+        .glass-card.mint { border-top: 3px solid var(--emerald-mint); }
+        .glass-card.red { border-top: 3px solid var(--coral-red); }
+        .glass-card.gold { border-top: 3px solid var(--amber-gold); }
+        .glass-card.purple { border-top: 3px solid var(--vivid-purple); }
+
+        .card-header {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 1rem;
+        }
+
+        .card-icon {
+            width: 38px;
+            height: 38px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.1rem;
+        }
+
+        .card-icon.cyan { background: rgba(0, 229, 255, 0.15); color: var(--primary-cyan); }
+        .card-icon.mint { background: rgba(16, 185, 129, 0.15); color: var(--emerald-mint); }
+        .card-icon.red { background: rgba(255, 82, 82, 0.15); color: var(--coral-red); }
+        .card-icon.gold { background: rgba(255, 184, 0, 0.15); color: var(--amber-gold); }
+        .card-icon.purple { background: rgba(168, 85, 247, 0.15); color: var(--vivid-purple); }
+
+        .card-title {
+            font-size: 1.15rem;
+            font-weight: 700;
+            color: #FFFFFF;
+        }
+
+        .card-body {
+            font-size: 0.92rem;
+            color: var(--text-secondary);
+            line-height: 1.6;
+            flex-grow: 1;
+        }
+
+        /* LCD 4x20 Simulation Box */
+        .lcd-display {
+            background-color: var(--lcd-bg);
+            border: 4px solid #1e293b;
+            border-radius: 10px;
+            padding: 14px 18px;
+            box-shadow: inset 0 0 20px rgba(0, 0, 0, 0.9), 0 0 15px rgba(57, 255, 20, 0.15);
+            font-family: 'VT323', monospace;
+            color: var(--lcd-text);
+            font-size: 1.45rem;
+            letter-spacing: 0.12em;
+            line-height: 1.25;
+            position: relative;
+            text-shadow: 0 0 8px rgba(57, 255, 20, 0.6);
+        }
+
+        .lcd-display::before {
+            content: "HD44780 4x20 CHAR MATRIX LCD";
+            position: absolute;
+            top: -12px;
+            right: 12px;
+            font-family: 'Fira Code', monospace;
+            font-size: 0.6rem;
+            color: var(--text-muted);
+            background: #1e293b;
+            padding: 1px 6px;
+            border-radius: 3px;
+        }
+
+        .lcd-row {
+            white-space: pre;
+            display: block;
+        }
+
+        .lcd-cursor {
+            display: inline-block;
+            background: var(--lcd-text);
+            color: var(--lcd-bg);
+            animation: blink 0.9s infinite;
+        }
+
+        @keyframes blink {
+            0%, 49% { opacity: 1; }
+            50%, 100% { opacity: 0; }
+        }
+
+        /* 4x4 Keypad Visual Simulation */
+        .keypad-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 8px;
+            background: #1e293b;
+            padding: 12px;
+            border-radius: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .key-btn {
+            background: #0f172a;
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            border-radius: 8px;
+            padding: 10px 0;
+            text-align: center;
+            font-family: 'Fira Code', monospace;
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            box-shadow: 0 3px 0 rgba(0,0,0,0.5);
+            transition: all 0.1s;
+        }
+
+        .key-btn.action {
+            color: var(--primary-cyan);
+            border-color: rgba(0, 229, 255, 0.3);
+            background: rgba(0, 229, 255, 0.08);
+        }
+
+        .key-btn.special {
+            color: var(--vivid-purple);
+            border-color: rgba(168, 85, 247, 0.3);
+            background: rgba(168, 85, 247, 0.08);
+        }
+
+        /* Feature List Styling */
+        .feature-list {
+            list-style: none;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .feature-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+        }
+
+        .feature-item i {
+            margin-top: 3px;
+            font-size: 0.85rem;
+        }
+
+        .feature-item strong {
+            color: #FFFFFF;
+        }
+
+        /* Code & Architecture Block */
+        .code-box {
+            background: #070D18;
+            border: 1px solid var(--border-card);
+            border-radius: 10px;
+            padding: 1rem;
+            font-family: 'Fira Code', monospace;
+            font-size: 0.82rem;
+            color: #94A3B8;
+            line-height: 1.5;
+            overflow-x: auto;
+        }
+
+        .code-keyword { color: #F43F5E; }
+        .code-type { color: #38BDF8; }
+        .code-func { color: #A855F7; }
+        .code-num { color: #F59E0B; }
+        .code-comment { color: #475569; font-style: italic; }
+
+        /* Slide 1 Dedicated Styles */
+        .hero-banner {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        .hero-inst {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            background: rgba(0, 229, 255, 0.08);
+            border: 1px solid rgba(0, 229, 255, 0.3);
+            padding: 6px 18px;
+            border-radius: 999px;
+            color: var(--primary-cyan);
+            font-size: 0.85rem;
+            font-weight: 700;
+            letter-spacing: 0.1em;
+            margin-bottom: 1rem;
+        }
+
+        .hero-title {
+            font-size: 3rem;
+            font-weight: 900;
+            letter-spacing: -0.03em;
+            line-height: 1.1;
+            background: linear-gradient(135deg, #FFFFFF 20%, var(--primary-cyan) 60%, var(--amber-gold) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 0.8rem;
+        }
+
+        .hero-desc {
+            font-size: 1.2rem;
+            color: var(--text-secondary);
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .supervisor-card {
+            background: linear-gradient(135deg, rgba(30, 41, 59, 0.7), rgba(15, 23, 42, 0.8));
+            border: 1px solid rgba(255, 184, 0, 0.3);
+            border-radius: 14px;
+            padding: 0.8rem 1.5rem;
+            display: inline-flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 2rem;
+            box-shadow: 0 0 20px rgba(255, 184, 0, 0.1);
+        }
+
+        .team-member-card {
+            background: rgba(15, 23, 42, 0.8);
+            border: 1px solid rgba(0, 229, 255, 0.18);
+            border-radius: 14px;
+            padding: 1.1rem 1rem;
+            text-align: center;
+            position: relative;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4);
+        }
+
+        .team-member-card:hover {
+            border-color: var(--primary-cyan);
+            transform: translateY(-4px);
+            box-shadow: 0 10px 25px rgba(0, 229, 255, 0.2);
+        }
+
+        .member-avatar {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, rgba(0, 229, 255, 0.2), rgba(168, 85, 247, 0.2));
+            border: 2px solid var(--primary-cyan);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 0.8rem;
+            font-size: 1.3rem;
+            color: var(--primary-cyan);
+        }
+
+        .member-name-ar {
+            font-family: 'Cairo', sans-serif;
+            font-size: 1.05rem;
+            font-weight: 700;
+            color: #FFFFFF;
+            margin-bottom: 3px;
+        }
+
+        .member-name-en {
+            font-size: 0.78rem;
+            color: var(--primary-cyan);
+            font-weight: 500;
+        }
+
+        .member-role {
+            display: inline-block;
+            font-size: 0.7rem;
+            color: var(--text-muted);
+            margin-top: 6px;
+            background: rgba(255, 255, 255, 0.05);
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-family: 'Fira Code', monospace;
+        }
+
+        /* Bottom Controls Bar */
+        .deck-footer {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 60px;
+            padding: 0 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: rgba(11, 17, 32, 0.9);
+            backdrop-filter: blur(16px);
+            border-top: 1px solid var(--border-card);
+            z-index: 100;
+        }
+
+        .nav-controls {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .nav-btn {
+            background: rgba(255, 255, 255, 0.06);
+            border: 1px solid var(--border-card);
+            color: #FFFFFF;
+            padding: 8px 18px;
+            border-radius: 8px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.2s;
+        }
+
+        .nav-btn:hover:not(:disabled) {
+            background: rgba(0, 229, 255, 0.15);
+            border-color: var(--primary-cyan);
+            color: var(--primary-cyan);
+        }
+
+        .nav-btn:disabled {
+            opacity: 0.3;
+            cursor: not-allowed;
+        }
+
+        .timeline-dots {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.2);
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+            position: relative;
+        }
+
+        .dot:hover {
+            background: rgba(255, 255, 255, 0.5);
+            transform: scale(1.3);
+        }
+
+        .dot.active {
+            background: var(--primary-cyan);
+            box-shadow: 0 0 10px var(--primary-cyan);
+            width: 24px;
+            border-radius: 5px;
+        }
+
+        /* Architecture Visual Stack */
+        .layer-stack {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            width: 100%;
+        }
+
+        .layer-bar {
+            border-radius: 12px;
+            padding: 1.1rem 1.4rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            position: relative;
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .layer-app {
+            background: linear-gradient(90deg, rgba(168, 85, 247, 0.2) 0%, rgba(15, 23, 42, 0.8) 100%);
+            border-left: 5px solid var(--vivid-purple);
+        }
+
+        .layer-hal {
+            background: linear-gradient(90deg, rgba(0, 229, 255, 0.2) 0%, rgba(15, 23, 42, 0.8) 100%);
+            border-left: 5px solid var(--primary-cyan);
+        }
+
+        .layer-mcal {
+            background: linear-gradient(90deg, rgba(16, 185, 129, 0.2) 0%, rgba(15, 23, 42, 0.8) 100%);
+            border-left: 5px solid var(--emerald-mint);
+        }
+
+        .layer-hw {
+            background: linear-gradient(90deg, rgba(255, 184, 0, 0.2) 0%, rgba(15, 23, 42, 0.8) 100%);
+            border-left: 5px solid var(--amber-gold);
+        }
+
+        .layer-title-box {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .layer-name {
+            font-size: 1.1rem;
+            font-weight: 800;
+            color: #FFFFFF;
+        }
+
+        .layer-modules {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .mod-pill {
+            font-family: 'Fira Code', monospace;
+            font-size: 0.78rem;
+            padding: 4px 10px;
+            border-radius: 6px;
+            background: rgba(0, 0, 0, 0.4);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            font-weight: 600;
+        }
+
+        /* Pulse Indicator */
+        .pulse-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            display: inline-block;
+            margin-right: 6px;
+            animation: pulse-glow 1.5s infinite;
+        }
+
+        @keyframes pulse-glow {
+            0% { transform: scale(0.9); opacity: 0.6; }
+            50% { transform: scale(1.3); opacity: 1; filter: drop-shadow(0 0 6px currentColor); }
+            100% { transform: scale(0.9); opacity: 0.6; }
+        }
+
+        /* Keyboard shortcuts tip */
+        .kb-tip {
+            font-size: 0.72rem;
+            color: var(--text-muted);
+            font-family: 'Fira Code', monospace;
+        }
+
+        .kb-key {
+            background: rgba(255,255,255,0.1);
+            padding: 2px 6px;
+            border-radius: 4px;
+            border: 1px solid rgba(255,255,255,0.15);
+            color: #CBD5E1;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- HUD Header -->
+    <header class="deck-header">
+        <div class="nti-badge">
+            <div class="nti-logo-icon">NTI</div>
+            <div class="nti-titles">
+                <span class="nti-title-main">NATIONAL TELECOMMUNICATION INSTITUTE</span>
+                <span class="nti-subtitle">Embedded Systems Professional Program • Team 2</span>
+            </div>
+        </div>
+        
+        <div class="deck-status">
+            <div class="tag-pill cyan"><i class="fa-solid fa-microchip"></i> ATmega32 AVR</div>
+            <div class="tag-pill gold"><i class="fa-solid fa-user-tie"></i> Eng. Mahmoud Morsy</div>
+            <div class="slide-counter" id="slideNumDisplay">01 / 14</div>
+        </div>
+    </header>
+
+    <!-- Presentation Body -->
+    <main class="slides-wrapper" id="slidesWrapper">
+
+        <!-- ========================================================================= -->
+        <!-- SLIDE 1: DEDICATED TITLE & TEAM CREDENTIALS -->
+        <!-- ========================================================================= -->
+        <section class="slide active" data-slide="1">
+            <div class="hero-banner">
+                <div class="hero-inst">
+                    <i class="fa-solid fa-graduation-cap"></i> NTI EMBEDDED SYSTEMS DIPLOMA FINAL PROJECT
+                </div>
+                <h1 class="hero-title">Advanced MCU Digital Watch<br>& Environmental Station</h1>
+                <p class="hero-desc">An Industrial-Grade, Non-Blocking Multi-Function Station Featuring Real-Time I2C RTC, Dual Telemetry ADC, Priority Dual Alarms, and Anti-Flicker State Machine</p>
+            </div>
+
+            <div style="text-align: center;">
+                <div class="supervisor-card">
+                    <i class="fa-solid fa-chalkboard-user" style="font-size: 1.5rem; color: var(--amber-gold);"></i>
+                    <div style="text-align: left;">
+                        <div style="font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.1em; color: var(--amber-gold); font-weight: 700;">Project Supervisor</div>
+                        <div style="font-size: 1.15rem; font-weight: 800; color: #FFFFFF;">Eng. Mahmoud Morsy</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="grid-5" style="margin-top: 0.5rem;">
+                <!-- Member 1 -->
+                <div class="team-member-card">
+                    <div class="member-avatar"><i class="fa-solid fa-code"></i></div>
+                    <div class="member-name-ar">أحمد عبدالغني محمد</div>
+                    <div class="member-name-en">Ahmed Abdelghany Mohamed</div>
+                    <span class="member-role">Team 2 Lead & Core MCAL</span>
+                </div>
+                <!-- Member 2 -->
+                <div class="team-member-card">
+                    <div class="member-avatar"><i class="fa-solid fa-microchip"></i></div>
+                    <div class="member-name-ar">فارس ايهاب قنديل</div>
+                    <div class="member-name-en">Fares Ehab Qandeel</div>
+                    <span class="member-role">HAL & I2C RTC Driver</span>
+                </div>
+                <!-- Member 3 -->
+                <div class="team-member-card">
+                    <div class="member-avatar"><i class="fa-solid fa-chart-line"></i></div>
+                    <div class="member-name-ar">عبدالله يحيى السيد يوسف</div>
+                    <div class="member-name-en">Abdullah Yehia Elsayed</div>
+                    <span class="member-role">ADC Telemetry & Math</span>
+                </div>
+                <!-- Member 4 -->
+                <div class="team-member-card">
+                    <div class="member-avatar"><i class="fa-solid fa-bell"></i></div>
+                    <div class="member-name-ar">مارتن تيموثاوس القس اسطفانوس</div>
+                    <div class="member-name-en">Martin Timothawis El Kess</div>
+                    <span class="member-role">Alarm & Ringing Engine</span>
+                </div>
+                <!-- Member 5 -->
+                <div class="team-member-card">
+                    <div class="member-avatar"><i class="fa-solid fa-stopwatch"></i></div>
+                    <div class="member-name-ar">أحمد عبدالفتاح عبدالصادق</div>
+                    <div class="member-name-en">Ahmed Abdelfattah Abdelsadek</div>
+                    <span class="member-role">Timers, Pomodoro & UI</span>
+                </div>
+            </div>
+        </section>
+
+        <!-- ========================================================================= -->
+        <!-- SLIDE 2: PROJECT OVERVIEW & CORE VISION -->
+        <!-- ========================================================================= -->
+        <section class="slide" data-slide="2">
+            <div class="slide-head">
+                <div class="slide-category" style="color: var(--primary-cyan);">
+                    <i class="fa-solid fa-compass"></i> System Architecture & Purpose
+                </div>
+                <h2 class="slide-title">Project Overview & Core Engineering Vision</h2>
+                <p class="slide-subtitle">Transforming a conventional microcontroller clock into a deterministic, multi-tasking environmental station</p>
+            </div>
+
+            <div class="grid-3">
+                <div class="glass-card cyan">
+                    <div class="card-header">
+                        <div class="card-icon cyan"><i class="fa-solid fa-bullseye"></i></div>
+                        <h3 class="card-title">Project Objectives</h3>
+                    </div>
+                    <div class="card-body">
+                        <ul class="feature-list">
+                            <li class="feature-item"><i class="fa-solid fa-check-circle" style="color:var(--primary-cyan)"></i> <strong>Ultra-Accurate Timekeeping:</strong> Hardware RTC DS1307 battery-backed clock with dual 12H/24H formats.</li>
+                            <li class="feature-item"><i class="fa-solid fa-check-circle" style="color:var(--primary-cyan)"></i> <strong>Multi-Mode Platform:</strong> 6 interactive screens (Clock, Telemetry, Alarms, Countdown, Stopwatch, Pomodoro).</li>
+                            <li class="feature-item"><i class="fa-solid fa-check-circle" style="color:var(--primary-cyan)"></i> <strong>Zero-Flicker Display:</strong> Smart differential rendering pipeline over 4x20 Character LCD.</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="glass-card mint">
+                    <div class="card-header">
+                        <div class="card-icon mint"><i class="fa-solid fa-gauge-high"></i></div>
+                        <h3 class="card-title">Real-Time Challenges</h3>
+                    </div>
+                    <div class="card-body">
+                        <ul class="feature-list">
+                            <li class="feature-item"><i class="fa-solid fa-triangle-exclamation" style="color:var(--emerald-mint)"></i> <strong>Deterministic Concurrency:</strong> Running countdowns, alarms, and stopwatches concurrently without blocking `_delay_ms()`.</li>
+                            <li class="feature-item"><i class="fa-solid fa-triangle-exclamation" style="color:var(--emerald-mint)"></i> <strong>ADC Noise Filtering:</strong> Accurate LM35 temperature and analog humidity sampling on 10-bit successive approximation ADC.</li>
+                            <li class="feature-item"><i class="fa-solid fa-triangle-exclamation" style="color:var(--emerald-mint)"></i> <strong>Keypad Debouncing:</strong> Finite State Machine key scanning with rapid responsiveness.</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="glass-card gold">
+                    <div class="card-header">
+                        <div class="card-icon gold"><i class="fa-solid fa-award"></i></div>
+                        <h3 class="card-title">Key Engineering Highlights</h3>
+                    </div>
+                    <div class="card-body">
+                        <ul class="feature-list">
+                            <li class="feature-item"><i class="fa-solid fa-star" style="color:var(--amber-gold)"></i> <strong>Layered Architecture:</strong> Strict separation of MCAL, HAL, and Application layers.</li>
+                            <li class="feature-item"><i class="fa-solid fa-star" style="color:var(--amber-gold)"></i> <strong>Timer0 Master Scheduler:</strong> 31.25 Hz hardware interrupt tick managing asynchronous state engines.</li>
+                            <li class="feature-item"><i class="fa-solid fa-star" style="color:var(--amber-gold)"></i> <strong>Global Settings Engine:</strong> Dynamic configuration overlay accessible instantly via the `[*]` key.</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ========================================================================= -->
+        <!-- SLIDE 3: LAYERED ARCHITECTURE -->
+        <!-- ========================================================================= -->
+        <section class="slide" data-slide="3">
+            <div class="slide-head">
+                <div class="slide-category" style="color: var(--vivid-purple);">
+                    <i class="fa-solid fa-layer-group"></i> Software Engineering
+                </div>
+                <h2 class="slide-title">Modular Layered Software Architecture</h2>
+                <p class="slide-subtitle">Adhering to Automotive & Industrial Embedded Standards: Complete Hardware Abstraction</p>
+            </div>
+
+            <div class="grid-3-2">
+                <div class="layer-stack">
+                    <!-- APP Layer -->
+                    <div class="layer-bar layer-app">
+                        <div class="layer-title-box">
+                            <i class="fa-solid fa-cubes" style="color: var(--vivid-purple); font-size: 1.4rem;"></i>
+                            <div>
+                                <div class="layer-name">APPLICATION LAYER (APP)</div>
+                                <div style="font-size: 0.75rem; color: var(--text-secondary);">State Machines, Screen Handlers, Background Services & UI Engine</div>
+                            </div>
+                        </div>
+                        <div class="layer-modules">
+                            <span class="mod-pill" style="color:var(--vivid-purple)">App_Clock</span>
+                            <span class="mod-pill" style="color:var(--vivid-purple)">App_Telemetry</span>
+                            <span class="mod-pill" style="color:var(--vivid-purple)">App_Alarm</span>
+                            <span class="mod-pill" style="color:var(--vivid-purple)">App_Timer</span>
+                            <span class="mod-pill" style="color:var(--vivid-purple)">App_Stopwatch</span>
+                            <span class="mod-pill" style="color:var(--vivid-purple)">App_Pomodoro</span>
+                            <span class="mod-pill" style="color:var(--vivid-purple)">App_Settings</span>
+                        </div>
+                    </div>
+
+                    <!-- HAL Layer -->
+                    <div class="layer-bar layer-hal">
+                        <div class="layer-title-box">
+                            <i class="fa-solid fa-desktop" style="color: var(--primary-cyan); font-size: 1.4rem;"></i>
+                            <div>
+                                <div class="layer-name">HARDWARE ABSTRACTION LAYER (HAL)</div>
+                                <div style="font-size: 0.75rem; color: var(--text-secondary);">Device-Specific Drivers, Protocol Wrappers & Filtering</div>
+                            </div>
+                        </div>
+                        <div class="layer-modules">
+                            <span class="mod-pill" style="color:var(--primary-cyan)">LCD 4x20 (HD44780)</span>
+                            <span class="mod-pill" style="color:var(--primary-cyan)">Keypad 4x4 Matrix</span>
+                            <span class="mod-pill" style="color:var(--primary-cyan)">RTC DS1307 (I2C)</span>
+                            <span class="mod-pill" style="color:var(--primary-cyan)">Active Buzzer Driver</span>
+                            <span class="mod-pill" style="color:var(--primary-cyan)">LM35 & Humidity Sensor</span>
+                        </div>
+                    </div>
+
+                    <!-- MCAL Layer -->
+                    <div class="layer-bar layer-mcal">
+                        <div class="layer-title-box">
+                            <i class="fa-solid fa-microchip" style="color: var(--emerald-mint); font-size: 1.4rem;"></i>
+                            <div>
+                                <div class="layer-name">MICROCONTROLLER ABSTRACTION (MCAL)</div>
+                                <div style="font-size: 0.75rem; color: var(--text-secondary);">Direct Register Access, Peripherals & Low-Level ISRs</div>
+                            </div>
+                        </div>
+                        <div class="layer-modules">
+                            <span class="mod-pill" style="color:var(--emerald-mint)">DIO (GPIO)</span>
+                            <span class="mod-pill" style="color:var(--emerald-mint)">ADC (10-bit)</span>
+                            <span class="mod-pill" style="color:var(--emerald-mint)">I2C / TWI Master</span>
+                            <span class="mod-pill" style="color:var(--emerald-mint)">TIMER0 (Tick Engine)</span>
+                            <span class="mod-pill" style="color:var(--emerald-mint)">Global Interrupts (GIE)</span>
+                        </div>
+                    </div>
+
+                    <!-- HW Layer -->
+                    <div class="layer-bar layer-hw">
+                        <div class="layer-title-box">
+                            <i class="fa-solid fa-memory" style="color: var(--amber-gold); font-size: 1.4rem;"></i>
+                            <div>
+                                <div class="layer-name">TARGET HARDWARE PLATFORM</div>
+                                <div style="font-size: 0.75rem; color: var(--text-secondary);">Physical Silicon, Quartz Oscillators & Sensor Array</div>
+                            </div>
+                        </div>
+                        <div class="layer-modules">
+                            <span class="mod-pill" style="color:var(--amber-gold)">ATmega32 @ 8MHz</span>
+                            <span class="mod-pill" style="color:var(--amber-gold)">DS1307 + 32.768kHz</span>
+                            <span class="mod-pill" style="color:var(--amber-gold)">LM35 Precision Temp</span>
+                            <span class="mod-pill" style="color:var(--amber-gold)">Analog Humidity Sensor</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Architectural Benefits -->
+                <div class="glass-card purple">
+                    <div class="card-header">
+                        <div class="card-icon purple"><i class="fa-solid fa-shield-halved"></i></div>
+                        <h3 class="card-title">Design Principles</h3>
+                    </div>
+                    <div class="card-body">
+                        <ul class="feature-list">
+                            <li class="feature-item">
+                                <i class="fa-solid fa-bolt" style="color:var(--vivid-purple)"></i>
+                                <div><strong>Portability & Reusability:</strong> Application algorithms are 100% target-agnostic. MCAL can be ported to STM32 or ESP32 with zero changes to App logic.</div>
+                            </li>
+                            <li class="feature-item">
+                                <i class="fa-solid fa-lock" style="color:var(--vivid-purple)"></i>
+                                <div><strong>Information Hiding:</strong> Application never touches hardware registers (e.g., `PORTA`, `TWCR`, `ADCSRA`). All interactions pass through structured HAL APIs.</div>
+                            </li>
+                            <li class="feature-item">
+                                <i class="fa-solid fa-code-branch" style="color:var(--vivid-purple)"></i>
+                                <div><strong>Static Memory Allocation:</strong> Zero heap memory allocation (`malloc`), eliminating memory fragmentation in embedded SRAM.</div>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ========================================================================= -->
+        <!-- SLIDE 4: HARDWARE INTERFACING & PINOUT -->
+        <!-- ========================================================================= -->
+        <section class="slide" data-slide="4">
+            <div class="slide-head">
+                <div class="slide-category" style="color: var(--amber-gold);">
+                    <i class="fa-solid fa-diagram-project"></i> Hardware & Schematics
+                </div>
+                <h2 class="slide-title">Hardware Interfacing & MCU Pin Allocation</h2>
+                <p class="slide-subtitle">ATmega32 40-Pin DIP Pinout Mapping & Bus Topology</p>
+            </div>
+
+            <div class="grid-3">
+                <div class="glass-card gold">
+                    <div class="card-header">
+                        <div class="card-icon gold"><i class="fa-solid fa-plug"></i></div>
+                        <h3 class="card-title">Port A & Port B Mapping</h3>
+                    </div>
+                    <div class="card-body">
+                        <table style="width:100%; font-size:0.82rem; border-collapse: collapse; font-family:'Fira Code', monospace;">
+                            <tr style="border-bottom: 1px solid var(--border-card); color: var(--amber-gold);">
+                                <th style="padding:6px; text-align:left;">PIN</th>
+                                <th style="padding:6px; text-align:left;">PERIPHERAL</th>
+                                <th style="padding:6px; text-align:left;">FUNCTION</th>
+                            </tr>
+                            <tr style="border-bottom: 1px solid rgba(255,255,255,0.05);">
+                                <td style="padding:6px; color:#FFFFFF;">PA0 (ADC0)</td>
+                                <td style="padding:6px;">LM35 Sensor</td>
+                                <td style="padding:6px; color:var(--emerald-mint);">Analog Temp In</td>
+                            </tr>
+                            <tr style="border-bottom: 1px solid rgba(255,255,255,0.05);">
+                                <td style="padding:6px; color:#FFFFFF;">PA1 (ADC1)</td>
+                                <td style="padding:6px;">Humidity Sensor</td>
+                                <td style="padding:6px; color:var(--emerald-mint);">Analog RH% In</td>
+                            </tr>
+                            <tr style="border-bottom: 1px solid rgba(255,255,255,0.05);">
+                                <td style="padding:6px; color:#FFFFFF;">PA2 - PA7</td>
+                                <td style="padding:6px;">LCD 4x20</td>
+                                <td style="padding:6px; color:var(--primary-cyan);">Data (D2-D7)</td>
+                            </tr>
+                            <tr>
+                                <td style="padding:6px; color:#FFFFFF;">PB0 - PB3</td>
+                                <td style="padding:6px;">LCD Control</td>
+                                <td style="padding:6px; color:var(--primary-cyan);">RS, RW, EN, D0</td>
+                            </tr>
+                        </table>
+                    </div>
+                </div>
+
+                <div class="glass-card cyan">
+                    <div class="card-header">
+                        <div class="card-icon cyan"><i class="fa-solid fa-network-wired"></i></div>
+                        <h3 class="card-title">Port C & I2C Bus Topology</h3>
+                    </div>
+                    <div class="card-body">
+                        <table style="width:100%; font-size:0.82rem; border-collapse: collapse; font-family:'Fira Code', monospace;">
+                            <tr style="border-bottom: 1px solid var(--border-card); color: var(--primary-cyan);">
+                                <th style="padding:6px; text-align:left;">PIN</th>
+                                <th style="padding:6px; text-align:left;">PERIPHERAL</th>
+                                <th style="padding:6px; text-align:left;">FUNCTION</th>
+                            </tr>
+                            <tr style="border-bottom: 1px solid rgba(255,255,255,0.05);">
+                                <td style="padding:6px; color:#FFFFFF;">PC0 (SCL)</td>
+                                <td style="padding:6px;">DS1307 RTC</td>
+                                <td style="padding:6px; color:var(--primary-cyan);">I2C Serial Clock</td>
+                            </tr>
+                            <tr style="border-bottom: 1px solid rgba(255,255,255,0.05);">
+                                <td style="padding:6px; color:#FFFFFF;">PC1 (SDA)</td>
+                                <td style="padding:6px;">DS1307 RTC</td>
+                                <td style="padding:6px; color:var(--primary-cyan);">I2C Serial Data</td>
+                            </tr>
+                            <tr style="border-bottom: 1px solid rgba(255,255,255,0.05);">
+                                <td style="padding:6px; color:#FFFFFF;">PC2 (DIO)</td>
+                                <td style="padding:6px;">Active Buzzer</td>
+                                <td style="padding:6px; color:var(--coral-red);">Alarm & Pomodoro Out</td>
+                            </tr>
+                            <tr>
+                                <td style="padding:6px; color:#FFFFFF;">PC3 - PC7</td>
+                                <td style="padding:6px;">Status LEDs</td>
+                                <td style="padding:6px; color:var(--amber-gold);">Telemetry Indicators</td>
+                            </tr>
+                        </table>
+                    </div>
+                </div>
+
+                <div class="glass-card mint">
+                    <div class="card-header">
+                        <div class="card-icon mint"><i class="fa-solid fa-table-cells"></i></div>
+                        <h3 class="card-title">Port D (4x4 Matrix Keypad)</h3>
+                    </div>
+                    <div class="card-body">
+                        <table style="width:100%; font-size:0.82rem; border-collapse: collapse; font-family:'Fira Code', monospace;">
+                            <tr style="border-bottom: 1px solid var(--border-card); color: var(--emerald-mint);">
+                                <th style="padding:6px; text-align:left;">PIN</th>
+                                <th style="padding:6px; text-align:left;">KEYPAD LINE</th>
+                                <th style="padding:6px; text-align:left;">DIRECTION / STATE</th>
+                            </tr>
+                            <tr style="border-bottom: 1px solid rgba(255,255,255,0.05);">
+                                <td style="padding:6px; color:#FFFFFF;">PD0 - PD3</td>
+                                <td style="padding:6px;">Rows R1 - R4</td>
+                                <td style="padding:6px; color:var(--primary-cyan);">Input (Internal Pull-up)</td>
+                            </tr>
+                            <tr style="border-bottom: 1px solid rgba(255,255,255,0.05);">
+                                <td style="padding:6px; color:#FFFFFF;">PD4 - PD7</td>
+                                <td style="padding:6px;">Cols C1 - C4</td>
+                                <td style="padding:6px; color:var(--amber-gold);">Output (Sequential Low)</td>
+                            </tr>
+                            <tr>
+                                <td colspan="3" style="padding:8px 6px; font-size:0.75rem; color:var(--text-secondary);">
+                                    <strong>Scanning Principle:</strong> Matrix drive-low scanning with 15ms debounce latching.
+                                </td>
+                            </tr>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ========================================================================= -->
+        <!-- SLIDE 5: SCREEN 1 - RTC & CALENDAR -->
+        <!-- ========================================================================= -->
+        <section class="slide" data-slide="5">
+            <div class="slide-head">
+                <div class="slide-category" style="color: var(--primary-cyan);">
+                    <i class="fa-solid fa-clock"></i> Screen 1 • Main Timekeeping
+                </div>
+                <h2 class="slide-title">Real-Time Clock & Dynamic Calendar</h2>
+                <p class="slide-subtitle">Hardware I2C Communication with DS1307 RTC, BCD Translation, & Dual Format Render</p>
+            </div>
+
+            <div class="grid-2">
+                <!-- Visual Display Simulation -->
+                <div class="glass-card cyan">
+                    <div class="card-header">
+                        <div class="card-icon cyan"><i class="fa-solid fa-tv"></i></div>
+                        <h3 class="card-title">Live 4x20 Character Display</h3>
+                    </div>
+                    <div class="lcd-display" style="margin-bottom: 1rem;">
+                        <span class="lcd-row">====================</span>
+                        <span class="lcd-row">  TIME: 10:45:32 PM </span>
+                        <span class="lcd-row">  DATE: 28/08/2026  </span>
+                        <span class="lcd-row">  DAY : FRIDAY [24H]</span>
+                    </div>
+                    <div class="card-body">
+                        <div class="tag-pill cyan" style="display:inline-flex; margin-bottom: 8px;">
+                            <span class="pulse-dot" style="background:var(--primary-cyan);"></span> DS1307 I2C Master Mode @ 100 kHz
+                        </div>
+                        <p style="font-size:0.85rem;">Communicates over Two-Wire Interface (TWI) bus reading seconds, minutes, hours, day-of-week, date, month, and year from register addresses `0x00` through `0x06`.</p>
+                    </div>
+                </div>
+
+                <!-- Engineering Specifications -->
+                <div class="glass-card cyan">
+                    <div class="card-header">
+                        <div class="card-icon cyan"><i class="fa-solid fa-microchip"></i></div>
+                        <h3 class="card-title">Technical Implementation</h3>
+                    </div>
+                    <div class="card-body">
+                        <ul class="feature-list">
+                            <li class="feature-item">
+                                <i class="fa-solid fa-arrow-right-arrow-left" style="color:var(--primary-cyan)"></i>
+                                <div><strong>BCD to Binary Math:</strong> Real-time conversion macros: `val = ((bcd >> 4) * 10) + (bcd & 0x0F)` for high-speed arithmetic.</div>
+                            </li>
+                            <li class="feature-item">
+                                <i class="fa-solid fa-sliders" style="color:var(--primary-cyan)"></i>
+                                <div><strong>12H / 24H Selectable Format:</strong> Instant conversion algorithm with AM/PM indicator flag, maintained across state navigations.</div>
+                            </li>
+                            <li class="feature-item">
+                                <i class="fa-solid fa-battery-full" style="color:var(--primary-cyan)"></i>
+                                <div><strong>Non-Volatile Battery Backup:</strong> CR2032 coin cell ensures continuous oscillation of the 32.768 kHz crystal during MCU power cycles.</div>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ========================================================================= -->
+        <!-- SLIDE 6: SCREEN 2 - CLIMATE & ENVIRONMENTAL TELEMETRY -->
+        <!-- ========================================================================= -->
+        <section class="slide" data-slide="6">
+            <div class="slide-head">
+                <div class="slide-category" style="color: var(--emerald-mint);">
+                    <i class="fa-solid fa-temperature-half"></i> Screen 2 • Environmental Sensor Hub
+                </div>
+                <h2 class="slide-title">Climate & Environmental Telemetry</h2>
+                <p class="slide-subtitle">10-Bit ADC Sampling, Moving Average Filter, & Tri-Unit Thermal Conversion</p>
+            </div>
+
+            <div class="grid-2">
+                <!-- Visual Display Simulation -->
+                <div class="glass-card mint">
+                    <div class="card-header">
+                        <div class="card-icon mint"><i class="fa-solid fa-tv"></i></div>
+                        <h3 class="card-title">Live 4x20 Character Display</h3>
+                    </div>
+                    <div class="lcd-display" style="margin-bottom: 1rem;">
+                        <span class="lcd-row">*** CLIMATE HUB *** </span>
+                        <span class="lcd-row">TEMP: 26.5 C (79.7F)</span>
+                        <span class="lcd-row">HUMIDITY : 58 % RH  </span>
+                        <span class="lcd-row">STATUS   : COMFORT  </span>
+                    </div>
+                    <div class="card-body">
+                        <div class="tag-pill mint" style="display:inline-flex; margin-bottom: 8px;">
+                            <span class="pulse-dot" style="background:var(--emerald-mint);"></span> ADC Pre-scaler 64 (125 kHz ADC Clock)
+                        </div>
+                        <p style="font-size:0.85rem;">Samples ADC0 (LM35 precision analog sensor) and ADC1 (linear humidity sensor) using internal Vref with software noise rejection.</p>
+                    </div>
+                </div>
+
+                <!-- Engineering Math & Algorithms -->
+                <div class="glass-card mint">
+                    <div class="card-header">
+                        <div class="card-icon mint"><i class="fa-solid fa-calculator"></i></div>
+                        <h3 class="card-title">ADC Mathematics & Conversions</h3>
+                    </div>
+                    <div class="card-body">
+                        <div class="code-box" style="margin-bottom: 0.8rem;">
+<span class="code-comment">// LM35: 10 mV / 1°C, Vref = 5.0V, 10-Bit Resolution = 1024</span>
+<span class="code-type">uint16_t</span> adc_val = <span class="code-func">ADC_Read</span>(<span class="code-num">0</span>);
+<span class="code-type">float</span> temp_c = (adc_val * <span class="code-num">500.0f</span>) / <span class="code-num">1024.0f</span>;
+<span class="code-type">float</span> temp_f = (temp_c * <span class="code-num">9.0f</span> / <span class="code-num">5.0f</span>) + <span class="code-num">32.0f</span>;
+<span class="code-type">float</span> temp_k = temp_c + <span class="code-num">273.15f</span>;
+                        </div>
+                        <ul class="feature-list">
+                            <li class="feature-item">
+                                <i class="fa-solid fa-arrows-rotate" style="color:var(--emerald-mint)"></i>
+                                <div><strong>Dynamic Unit Cycling:</strong> Toggle between Celsius (°C), Fahrenheit (°F), and Kelvin (K) globally.</div>
+                            </li>
+                            <li class="feature-item">
+                                <i class="fa-solid fa-filter" style="color:var(--emerald-mint)"></i>
+                                <div><strong>8-Sample Circular Buffer Filter:</strong> Eliminates analog jitter and spurious electromagnetic interference.</div>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ========================================================================= -->
+        <!-- SLIDE 7: SCREEN 3 - DUAL MULTI-ALARM ENGINE -->
+        <!-- ========================================================================= -->
+        <section class="slide" data-slide="7">
+            <div class="slide-head">
+                <div class="slide-category" style="color: var(--coral-red);">
+                    <i class="fa-solid fa-bell"></i> Screen 3 • Auditory & Alert Subsystem
+                </div>
+                <h2 class="slide-title">Dual Multi-Alarm & Ringing Engine</h2>
+                <p class="slide-subtitle">Independent Dual Schedules, Dynamic Time Buffering, Snooze, & Non-Blocking Buzzer</p>
+            </div>
+
+            <div class="grid-2">
+                <!-- Visual Display Simulation -->
+                <div class="glass-card red">
+                    <div class="card-header">
+                        <div class="card-icon red"><i class="fa-solid fa-tv"></i></div>
+                        <h3 class="card-title">Live 4x20 Character Display</h3>
+                    </div>
+                    <div class="lcd-display" style="margin-bottom: 1rem;">
+                        <span class="lcd-row">** ALARM CONFIG **  </span>
+                        <span class="lcd-row">ALARM 1: 07:00 [ON] </span>
+                        <span class="lcd-row">ALARM 2: 18:30 [OFF]</span>
+                        <span class="lcd-row">[1]SET [2]TOGGLE    </span>
+                    </div>
+                    <div class="card-body">
+                        <div class="tag-pill" style="border-color:var(--coral-red); color:var(--coral-red); display:inline-flex; margin-bottom: 8px;">
+                            <span class="pulse-dot" style="background:var(--coral-red);"></span> PORTC Pin 2 Active Transistor Buzzer
+                        </div>
+                        <p style="font-size:0.85rem;">Provides independent alarm registers. When current RTC time matches an enabled alarm, the system triggers the asynchronous ringing engine.</p>
+                    </div>
+                </div>
+
+                <!-- Alarm Logic & Features -->
+                <div class="glass-card red">
+                    <div class="card-header">
+                        <div class="card-icon red"><i class="fa-solid fa-burst"></i></div>
+                        <h3 class="card-title">Ringing & Control State Flow</h3>
+                    </div>
+                    <div class="card-body">
+                        <ul class="feature-list">
+                            <li class="feature-item">
+                                <i class="fa-solid fa-keyboard" style="color:var(--coral-red)"></i>
+                                <div><strong>Dynamic Typing Buffer:</strong> Interactive numeric entry on Keypad for hours and minutes with cursor repositioning.</div>
+                            </li>
+                            <li class="feature-item">
+                                <i class="fa-solid fa-volume-high" style="color:var(--coral-red)"></i>
+                                <div><strong>Pulsed Auditory Alert:</strong> Timer0 ISR modulates the buzzer at 2 Hz pulsed cadence, avoiding continuous annoying pitch.</div>
+                            </li>
+                            <li class="feature-item">
+                                <i class="fa-solid fa-bed" style="color:var(--coral-red)"></i>
+                                <div><strong>Smart Snooze & Dismiss:</strong> Pressing <code>[+]</code> adds +5 minutes to active alarm; pressing <code>[/]</code> completely disarms the active ringing state.</div>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ========================================================================= -->
+        <!-- SLIDE 8: SCREEN 4 - PRECISION COUNTDOWN TIMER -->
+        <!-- ========================================================================= -->
+        <section class="slide" data-slide="8">
+            <div class="slide-head">
+                <div class="slide-category" style="color: var(--amber-gold);">
+                    <i class="fa-solid fa-hourglass-half"></i> Screen 4 • Precision Timing
+                </div>
+                <h2 class="slide-title">Precision Countdown Timer</h2>
+                <p class="slide-subtitle">Shift-Register Digit Entry, Background Timer0 Decrementer, & Expiry Buzzer</p>
+            </div>
+
+            <div class="grid-2">
+                <!-- Visual Display Simulation -->
+                <div class="glass-card gold">
+                    <div class="card-header">
+                        <div class="card-icon gold"><i class="fa-solid fa-tv"></i></div>
+                        <h3 class="card-title">Live 4x20 Character Display</h3>
+                    </div>
+                    <div class="lcd-display" style="margin-bottom: 1rem;">
+                        <span class="lcd-row">-- COUNTDOWN TIMER -</span>
+                        <span class="lcd-row">   REMAIN: 00:14:59 </span>
+                        <span class="lcd-row">   STATUS: RUNNING  </span>
+                        <span class="lcd-row">[/]PAUSE  [=]RESET  </span>
+                    </div>
+                    <div class="card-body">
+                        <div class="tag-pill gold" style="display:inline-flex; margin-bottom: 8px;">
+                            <span class="pulse-dot" style="background:var(--amber-gold);"></span> 1-Second Deterministic Decrement
+                        </div>
+                        <p style="font-size:0.85rem;">Allows setting hours, minutes, and seconds. Runs in background with persistent state across all screens.</p>
+                    </div>
+                </div>
+
+                <!-- Implementation Details -->
+                <div class="glass-card gold">
+                    <div class="card-header">
+                        <div class="card-icon gold"><i class="fa-solid fa-gears"></i></div>
+                        <h3 class="card-title">Digital Entry & Execution Model</h3>
+                    </div>
+                    <div class="card-body">
+                        <ul class="feature-list">
+                            <li class="feature-item">
+                                <i class="fa-solid fa-arrow-right-to-bracket" style="color:var(--amber-gold)"></i>
+                                <div><strong>Shift-Register Entry Mode:</strong> Entering digits shifts from right to left (HH:MM:SS) seamlessly mimicking commercial microwave timers.</div>
+                            </li>
+                            <li class="feature-item">
+                                <i class="fa-solid fa-circle-play" style="color:var(--amber-gold)"></i>
+                                <div><strong>Tri-State Engine:</strong> Handles <code>STOPPED</code>, <code>RUNNING</code>, and <code>PAUSED</code> states cleanly via single-key keypad triggers.</div>
+                            </li>
+                            <li class="feature-item">
+                                <i class="fa-solid fa-triangle-exclamation" style="color:var(--amber-gold)"></i>
+                                <div><strong>Completion Alert:</strong> Emits a distinctive 5-beep sequence upon hitting <code>00:00:00</code> without stalling the main loop.</div>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ========================================================================= -->
+        <!-- SLIDE 9: SCREEN 5 - DIGITAL STOPWATCH -->
+        <!-- ========================================================================= -->
+        <section class="slide" data-slide="9">
+            <div class="slide-head">
+                <div class="slide-category" style="color: var(--amber-gold);">
+                    <i class="fa-solid fa-stopwatch-20"></i> Screen 5 • Elapsed Time Counter
+                </div>
+                <h2 class="slide-title">High-Accuracy Digital Stopwatch</h2>
+                <p class="slide-subtitle">Continuous 1-Second Incremental Counter up to 99:59:59 with Background Persistence</p>
+            </div>
+
+            <div class="grid-2">
+                <!-- Visual Display Simulation -->
+                <div class="glass-card gold">
+                    <div class="card-header">
+                        <div class="card-icon gold"><i class="fa-solid fa-tv"></i></div>
+                        <h3 class="card-title">Live 4x20 Character Display</h3>
+                    </div>
+                    <div class="lcd-display" style="margin-bottom: 1rem;">
+                        <span class="lcd-row">== DIGITAL STOPWATCH</span>
+                        <span class="lcd-row">   ELAPSED TIME:    </span>
+                        <span class="lcd-row">     01:23:45       </span>
+                        <span class="lcd-row">[/]START/STOP [=]RST</span>
+                    </div>
+                    <div class="card-body">
+                        <div class="tag-pill gold" style="display:inline-flex; margin-bottom: 8px;">
+                            <span class="pulse-dot" style="background:var(--amber-gold);"></span> Zero Drift ISR Elapsed Tracker
+                        </div>
+                        <p style="font-size:0.85rem;">Maintains elapsed time in standard seconds accumulator variable driven by the Timer0 31.25 Hz scheduler.</p>
+                    </div>
+                </div>
+
+                <!-- Engineering Characteristics -->
+                <div class="glass-card gold">
+                    <div class="card-header">
+                        <div class="card-icon gold"><i class="fa-solid fa-microchip"></i></div>
+                        <h3 class="card-title">Architecture Highlights</h3>
+                    </div>
+                    <div class="card-body">
+                        <ul class="feature-list">
+                            <li class="feature-item">
+                                <i class="fa-solid fa-shield" style="color:var(--amber-gold)"></i>
+                                <div><strong>Screen-Decoupled Counting:</strong> The user can start the stopwatch, switch to check temperature or clock, and return to find exact elapsed time without loss of a single tick.</div>
+                            </li>
+                            <li class="feature-item">
+                                <i class="fa-solid fa-bolt" style="color:var(--amber-gold)"></i>
+                                <div><strong>Atomic 32-Bit Access:</strong> Elapsed ticks read with interrupt protection (`cli()` / `sei()`) to prevent race conditions during multi-byte reads.</div>
+                            </li>
+                            <li class="feature-item">
+                                <i class="fa-solid fa-rotate-left" style="color:var(--amber-gold)"></i>
+                                <div><strong>Instant Zero Reset:</strong> Reset command zeros hours, minutes, seconds and flags instantaneously.</div>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ========================================================================= -->
+        <!-- SLIDE 10: SCREEN 6 - POMODORO PRODUCTIVITY ENGINE -->
+        <!-- ========================================================================= -->
+        <section class="slide" data-slide="10">
+            <div class="slide-head">
+                <div class="slide-category" style="color: var(--amber-gold);">
+                    <i class="fa-solid fa-brain"></i> Screen 6 • Productivity Engine
+                </div>
+                <h2 class="slide-title">Pomodoro Technique Productivity Engine</h2>
+                <p class="slide-subtitle">Automated 25m Work / 5m Short Break / 15m Long Break Cycles with Visual Progress Bar</p>
+            </div>
+
+            <div class="grid-2">
+                <!-- Visual Display Simulation -->
+                <div class="glass-card gold">
+                    <div class="card-header">
+                        <div class="card-icon gold"><i class="fa-solid fa-tv"></i></div>
+                        <h3 class="card-title">Live 4x20 Character Display</h3>
+                    </div>
+                    <div class="lcd-display" style="margin-bottom: 1rem;">
+                        <span class="lcd-row">POMODORO: WORK [2/4]</span>
+                        <span class="lcd-row">TIME : 18:42 REMAIN </span>
+                        <span class="lcd-row">PROG : [=====>    ] </span>
+                        <span class="lcd-row">[/]START/PAUSE [=]R </span>
+                    </div>
+                    <div class="card-body">
+                        <div class="tag-pill gold" style="display:inline-flex; margin-bottom: 8px;">
+                            <span class="pulse-dot" style="background:var(--amber-gold);"></span> 4-Stage State Progression Machine
+                        </div>
+                        <p style="font-size:0.85rem;">Implements the classic productivity methodology in bare-metal embedded C, alerting the engineer at every interval boundary.</p>
+                    </div>
+                </div>
+
+                <!-- State Progression Details -->
+                <div class="glass-card gold">
+                    <div class="card-header">
+                        <div class="card-icon gold"><i class="fa-solid fa-diagram-next"></i></div>
+                        <h3 class="card-title">Cycle Progression Logic</h3>
+                    </div>
+                    <div class="card-body">
+                        <ul class="feature-list">
+                            <li class="feature-item">
+                                <i class="fa-solid fa-briefcase" style="color:var(--amber-gold)"></i>
+                                <div><strong>Work Sprint (25 Mins):</strong> Focus timer with visual animated 10-segment custom character progress bar on LCD Line 3.</div>
+                            </li>
+                            <li class="feature-item">
+                                <i class="fa-solid fa-mug-hot" style="color:var(--emerald-mint)"></i>
+                                <div><strong>Short Break (5 Mins):</strong> Automatically triggered after each sprint with 2 short buzzer confirmation beeps.</div>
+                            </li>
+                            <li class="feature-item">
+                                <i class="fa-solid fa-couch" style="color:var(--primary-cyan)"></i>
+                                <div><strong>Long Break (15 Mins):</strong> Automatically activated after completing 4 consecutive work sprints, accompanied by a 3-beep fanfare.</div>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ========================================================================= -->
+        <!-- SLIDE 11: GLOBAL [*] SETTINGS & CUSTOMIZATION -->
+        <!-- ========================================================================= -->
+        <section class="slide" data-slide="11">
+            <div class="slide-head">
+                <div class="slide-category" style="color: var(--vivid-purple);">
+                    <i class="fa-solid fa-gears"></i> Global Feature • System Configuration
+                </div>
+                <h2 class="slide-title">Global Settings & Configuration Modal</h2>
+                <p class="slide-subtitle">Instant-Access Modal Overlay via Keypad `[*]` Key from Any Active Screen</p>
+            </div>
+
+            <div class="grid-2">
+                <!-- Visual Display Simulation -->
+                <div class="glass-card purple">
+                    <div class="card-header">
+                        <div class="card-icon purple"><i class="fa-solid fa-tv"></i></div>
+                        <h3 class="card-title">Live 4x20 Settings Modal</h3>
+                    </div>
+                    <div class="lcd-display" style="margin-bottom: 1rem;">
+                        <span class="lcd-row">** SYSTEM SETTINGS *</span>
+                        <span class="lcd-row">1.SET TIME & DATE   </span>
+                        <span class="lcd-row">2.TIME FORMAT: [12H]</span>
+                        <span class="lcd-row">3.TEMP UNIT  : [ C ]</span>
+                    </div>
+                    <div class="card-body">
+                        <div class="tag-pill" style="border-color:var(--vivid-purple); color:var(--vivid-purple); display:inline-flex; margin-bottom: 8px;">
+                            <span class="pulse-dot" style="background:var(--vivid-purple);"></span> Global Keypad Interrupt Vector
+                        </div>
+                        <p style="font-size:0.85rem;">Pressing <code>[*]</code> intercepts the current screen context, preserves stack memory, and opens the master configuration menu.</p>
+                    </div>
+                </div>
+
+                <!-- Configurable Parameters -->
+                <div class="glass-card purple">
+                    <div class="card-header">
+                        <div class="card-icon purple"><i class="fa-solid fa-sliders"></i></div>
+                        <h3 class="card-title">Available Customizations</h3>
+                    </div>
+                    <div class="card-body">
+                        <ul class="feature-list">
+                            <li class="feature-item">
+                                <i class="fa-solid fa-calendar-check" style="color:var(--vivid-purple)"></i>
+                                <div><strong>RTC Time & Date Calibrator:</strong> Live I2C write to DS1307 registers with numeric digit validation (checks 0-23 hrs, 0-59 mins, valid leap years).</div>
+                            </li>
+                            <li class="feature-item">
+                                <i class="fa-solid fa-clock-rotate-left" style="color:var(--vivid-purple)"></i>
+                                <div><strong>Time Mode Selector:</strong> Switches globally between 12-Hour (AM/PM) and 24-Hour Military format across all displays.</div>
+                            </li>
+                            <li class="feature-item">
+                                <i class="fa-solid fa-temperature-arrow-up" style="color:var(--vivid-purple)"></i>
+                                <div><strong>Temperature Metric:</strong> Changes environmental display units between Celsius (°C), Fahrenheit (°F), and Kelvin (K).</div>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ========================================================================= -->
+        <!-- SLIDE 12: USER INTERFACE & KEYPAD STATE MACHINE -->
+        <!-- ========================================================================= -->
+        <section class="slide" data-slide="12">
+            <div class="slide-head">
+                <div class="slide-category" style="color: var(--primary-cyan);">
+                    <i class="fa-solid fa-gamepad"></i> UI/UX & Human-Machine Interface
+                </div>
+                <h2 class="slide-title">4x4 Keypad State Machine & Navigation</h2>
+                <p class="slide-subtitle">Deterministic Event-Driven FSM with Anti-Flicker Differential LCD Refresh</p>
+            </div>
+
+            <div class="grid-3">
+                <!-- Keypad Matrix Simulation -->
+                <div class="glass-card cyan">
+                    <div class="card-header">
+                        <div class="card-icon cyan"><i class="fa-solid fa-keyboard"></i></div>
+                        <h3 class="card-title">4x4 Matrix Layout</h3>
+                    </div>
+                    <div class="keypad-grid">
+                        <div class="key-btn">1</div>
+                        <div class="key-btn">2</div>
+                        <div class="key-btn">3</div>
+                        <div class="key-btn action" title="Next Screen">+</div>
+
+                        <div class="key-btn">4</div>
+                        <div class="key-btn">5</div>
+                        <div class="key-btn">6</div>
+                        <div class="key-btn action" title="Prev Screen">-</div>
+
+                        <div class="key-btn">7</div>
+                        <div class="key-btn">8</div>
+                        <div class="key-btn">9</div>
+                        <div class="key-btn action" title="Action / OK">/</div>
+
+                        <div class="key-btn special" title="Settings">*</div>
+                        <div class="key-btn">0</div>
+                        <div class="key-btn special">#</div>
+                        <div class="key-btn action" title="Back / Reset">=</div>
+                    </div>
+                </div>
+
+                <!-- Navigation Mapping -->
+                <div class="glass-card cyan">
+                    <div class="card-header">
+                        <div class="card-icon cyan"><i class="fa-solid fa-route"></i></div>
+                        <h3 class="card-title">Navigation Bindings</h3>
+                    </div>
+                    <div class="card-body">
+                        <ul class="feature-list" style="font-size:0.85rem;">
+                            <li class="feature-item"><strong style="color:var(--primary-cyan)">[+] Key:</strong> Next Screen (1 &rarr; 2 &rarr; 3 &rarr; 4 &rarr; 5 &rarr; 6)</li>
+                            <li class="feature-item"><strong style="color:var(--primary-cyan)">[-] Key:</strong> Previous Screen (6 &larr; 5 &larr; 4 &larr; 3 &larr; 2 &larr; 1)</li>
+                            <li class="feature-item"><strong style="color:var(--emerald-mint)">[/] Key:</strong> OK / Start / Pause / Confirm Selection</li>
+                            <li class="feature-item"><strong style="color:var(--coral-red)">[=] Key:</strong> Back / Cancel / Reset Counter</li>
+                            <li class="feature-item"><strong style="color:var(--vivid-purple)">[*] Key:</strong> Open Global Settings Menu Modal</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Anti-Flicker UI Algorithm -->
+                <div class="glass-card cyan">
+                    <div class="card-header">
+                        <div class="card-icon cyan"><i class="fa-solid fa-wand-magic-sparkles"></i></div>
+                        <h3 class="card-title">Anti-Flicker Architecture</h3>
+                    </div>
+                    <div class="card-body">
+                        <ul class="feature-list" style="font-size:0.85rem;">
+                            <li class="feature-item">
+                                <i class="fa-solid fa-ban" style="color:var(--coral-red)"></i>
+                                <div><strong>No Full Screen Clears:</strong> Avoids continuous calls to <code>LCD_Clear()</code> which cause harsh visual strobing.</div>
+                            </li>
+                            <li class="feature-item">
+                                <i class="fa-solid fa-flag" style="color:var(--primary-cyan)"></i>
+                                <div><strong>Dirty-Flag Buffer Rendering:</strong> Only LCD positions whose characters have physically mutated are updated over the bus.</div>
+                            </li>
+                            <li class="feature-item">
+                                <i class="fa-solid fa-gauge" style="color:var(--emerald-mint)"></i>
+                                <div><strong>Bus Bandwidth Saving:</strong> Reduces LCD command overhead by over 82%, freeing MCU execution cycles.</div>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ========================================================================= -->
+        <!-- SLIDE 13: CONCURRENCY ENGINE - TIMER0 & INTERRUPTS -->
+        <!-- ========================================================================= -->
+        <section class="slide" data-slide="13">
+            <div class="slide-head">
+                <div class="slide-category" style="color: var(--emerald-mint);">
+                    <i class="fa-solid fa-microchip"></i> Real-Time Scheduling Core
+                </div>
+                <h2 class="slide-title">Concurrency Engine: Timer0 ISR & Scheduler</h2>
+                <p class="slide-subtitle">31.25 Hz Deterministic Hardware Master Tick Driving Parallel Tasks Without an RTOS</p>
+            </div>
+
+            <div class="grid-2">
+                <div class="glass-card mint">
+                    <div class="card-header">
+                        <div class="card-icon mint"><i class="fa-solid fa-wave-square"></i></div>
+                        <h3 class="card-title">Timer0 Math & Tick Generation</h3>
+                    </div>
+                    <div class="card-body">
+                        <div class="code-box" style="margin-bottom: 0.8rem;">
+<span class="code-comment">/* System Frequency = 8,000,000 Hz, Prescaler = 1024 */</span>
+<span class="code-comment">/* Timer Tick Rate = 8,000,000 / 1024 = 7812.5 Hz   */</span>
+<span class="code-comment">/* 8-Bit Overflow Period = 256 Ticks                */</span>
+<span class="code-comment">/* Overflow Frequency = 7812.5 / 256 = 30.51 Hz (~31 Overflows/sec) */</span>
+
+<span class="code-func">ISR</span>(TIMER0_OVF_vect) {
+    <span class="code-keyword">static</span> <span class="code-type">uint8_t</span> ovf_count = <span class="code-num">0</span>;
+    ovf_count++;
+    <span class="code-keyword">if</span> (ovf_count >= <span class="code-num">31</span>) {
+        ovf_count = <span class="code-num">0</span>;
+        system_1sec_flag = <span class="code-num">1</span>; <span class="code-comment">// Master 1-Second Tick</span>
+    }
+}
+                        </div>
+                    </div>
+                </div>
+
+                <div class="glass-card mint">
+                    <div class="card-header">
+                        <div class="card-icon mint"><i class="fa-solid fa-arrows-split-up-and-left"></i></div>
+                        <h3 class="card-title">Cooperative Multi-Task Dispatcher</h3>
+                    </div>
+                    <div class="card-body">
+                        <ul class="feature-list">
+                            <li class="feature-item">
+                                <i class="fa-solid fa-check" style="color:var(--emerald-mint)"></i>
+                                <div><strong>Non-Blocking Execution:</strong> Every application engine (Stopwatch, Countdown, Pomodoro, Alarm Check) runs inside a short cooperative step function.</div>
+                            </li>
+                            <li class="feature-item">
+                                <i class="fa-solid fa-check" style="color:var(--emerald-mint)"></i>
+                                <div><strong>Volatile Thread Safety:</strong> Flags shared between ISR and super-loop (e.g., <code>system_1sec_flag</code>) are declared <code>volatile</code> to prevent compiler caching.</div>
+                            </li>
+                            <li class="feature-item">
+                                <i class="fa-solid fa-check" style="color:var(--emerald-mint)"></i>
+                                <div><strong>Guaranteed Response Time:</strong> Keypad scan executes at 50 Hz, ensuring zero missed key presses during heavy display updates.</div>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ========================================================================= -->
+        <!-- SLIDE 14: CONCLUSION, FUTURE SCOPE & Q&A -->
+        <!-- ========================================================================= -->
+        <section class="slide" data-slide="14">
+            <div class="slide-head">
+                <div class="slide-category" style="color: var(--amber-gold);">
+                    <i class="fa-solid fa-flag-checkered"></i> Summary & Technical Roadmap
+                </div>
+                <h2 class="slide-title">Conclusion, Future Roadmap & Technical Q&A</h2>
+                <p class="slide-subtitle">Summary of Accomplishments & Potential Next-Generation Commercial Upgrades</p>
+            </div>
+
+            <div class="grid-3">
+                <div class="glass-card cyan">
+                    <div class="card-header">
+                        <div class="card-icon cyan"><i class="fa-solid fa-check-double"></i></div>
+                        <h3 class="card-title">Accomplishments</h3>
+                    </div>
+                    <div class="card-body">
+                        <ul class="feature-list" style="font-size:0.85rem;">
+                            <li class="feature-item"><i class="fa-solid fa-circle-check" style="color:var(--primary-cyan)"></i> Fully modular 3-layer architecture (MCAL, HAL, APP).</li>
+                            <li class="feature-item"><i class="fa-solid fa-circle-check" style="color:var(--primary-cyan)"></i> 6 concurrent feature-rich screens on 4x20 LCD.</li>
+                            <li class="feature-item"><i class="fa-solid fa-circle-check" style="color:var(--primary-cyan)"></i> Robust I2C DS1307 RTC & dual ADC telemetry.</li>
+                            <li class="feature-item"><i class="fa-solid fa-circle-check" style="color:var(--primary-cyan)"></i> Zero-flicker differential UI rendering engine.</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="glass-card mint">
+                    <div class="card-header">
+                        <div class="card-icon mint"><i class="fa-solid fa-rocket"></i></div>
+                        <h3 class="card-title">Future Scope (v2.0)</h3>
+                    </div>
+                    <div class="card-body">
+                        <ul class="feature-list" style="font-size:0.85rem;">
+                            <li class="feature-item"><i class="fa-solid fa-wifi" style="color:var(--emerald-mint)"></i> <strong>WiFi NTP Sync:</strong> ESP8266 UART integration for automatic atomic time synchronization.</li>
+                            <li class="feature-item"><i class="fa-brands fa-bluetooth-b" style="color:var(--primary-cyan)"></i> <strong>BLE Companion App:</strong> Android/iOS app via HC-05/BLE for remote alarm scheduling.</li>
+                            <li class="feature-item"><i class="fa-solid fa-display" style="color:var(--vivid-purple)"></i> <strong>OLED / TFT Display:</strong> Upgrade to full-color SPI ST7789 display with graphical dials.</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="glass-card gold">
+                    <div class="card-header">
+                        <div class="card-icon gold"><i class="fa-solid fa-comments"></i></div>
+                        <h3 class="card-title">Team 2 & NTI Credits</h3>
+                    </div>
+                    <div class="card-body" style="text-align: center;">
+                        <p style="color:#FFFFFF; font-weight:700; font-size:1.1rem; margin-bottom: 0.5rem;">Thank You!</p>
+                        <p style="font-size:0.85rem; color:var(--text-secondary); margin-bottom: 1rem;">Under the Supervision of<br><strong style="color:var(--amber-gold);">Eng. Mahmoud Morsy</strong></p>
+                        <div style="background: rgba(255, 184, 0, 0.1); border: 1px solid var(--amber-gold); padding: 8px; border-radius: 8px; font-weight: 700; color: var(--amber-gold);">
+                            Open for Technical Questions & Answers
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Footer Navigation HUD -->
+    <footer class="deck-footer">
+        <div class="nav-controls">
+            <button class="nav-btn" id="prevBtn" onclick="navigateSlide(-1)">
+                <i class="fa-solid fa-arrow-left"></i> Prev
+            </button>
+            <button class="nav-btn" id="nextBtn" onclick="navigateSlide(1)">
+                Next <i class="fa-solid fa-arrow-right"></i>
+            </button>
+        </div>
+
+        <div class="timeline-dots" id="dotsContainer">
+            <!-- Dynamically populated 14 dots -->
+        </div>
+
+        <div style="display:flex; align-items:center; gap: 15px;">
+            <div class="kb-tip">
+                <span class="kb-key">←</span> <span class="kb-key">→</span> or <span class="kb-key">Space</span> to Navigate • <span class="kb-key">F</span> Fullscreen
+            </div>
+            <button class="nav-btn" onclick="toggleFullscreen()" style="padding: 8px 12px;">
+                <i class="fa-solid fa-expand"></i>
+            </button>
+        </div>
+    </footer>
+
+    <!-- JavaScript Interactive Slide Engine -->
+    <script>
+        let currentSlide = 1;
+        const totalSlides = 14;
+
+        // Initialize timeline dots
+        const dotsContainer = document.getElementById('dotsContainer');
+        for (let i = 1; i <= totalSlides; i++) {
+            const dot = document.createElement('div');
+            dot.className = `dot ${i === 1 ? 'active' : ''}`;
+            dot.title = `Slide ${i}`;
+            dot.onclick = () => goToSlide(i);
+            dotsContainer.appendChild(dot);
+        }
+
+        function updateSlideUI() {
+            // Update slides
+            document.querySelectorAll('.slide').forEach(slide => {
+                slide.classList.remove('active');
+                if (parseInt(slide.getAttribute('data-slide')) === currentSlide) {
+                    slide.classList.add('active');
+                }
+            });
+
+            // Update dots
+            document.querySelectorAll('.dot').forEach((dot, idx) => {
+                dot.classList.toggle('active', idx + 1 === currentSlide);
+            });
+
+            // Update counter
+            document.getElementById('slideNumDisplay').innerText = 
+                `${currentSlide < 10 ? '0' + currentSlide : currentSlide} / ${totalSlides}`;
+
+            // Update button states
+            document.getElementById('prevBtn').disabled = (currentSlide === 1);
+            document.getElementById('nextBtn').disabled = (currentSlide === totalSlides);
+        }
+
+        function navigateSlide(direction) {
+            currentSlide += direction;
+            if (currentSlide < 1) currentSlide = 1;
+            if (currentSlide > totalSlides) currentSlide = totalSlides;
+            updateSlideUI();
+        }
+
+        function goToSlide(slideNum) {
+            currentSlide = slideNum;
+            updateSlideUI();
+        }
+
+        // Keyboard Navigation
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowRight' || e.key === ' ' || e.key === 'PageDown') {
+                e.preventDefault();
+                navigateSlide(1);
+            } else if (e.key === 'ArrowLeft' || e.key === 'PageUp') {
+                e.preventDefault();
+                navigateSlide(-1);
+            } else if (e.key === 'Home') {
+                e.preventDefault();
+                goToSlide(1);
+            } else if (e.key === 'End') {
+                e.preventDefault();
+                goToSlide(totalSlides);
+            } else if (e.key === 'f' || e.key === 'F') {
+                toggleFullscreen();
+            }
+        });
+
+        function toggleFullscreen() {
+            if (!document.fullscreenElement) {
+                document.documentElement.requestFullscreen().catch(err => console.log(err));
+            } else {
+                if (document.exitFullscreen) {
+                    document.exitFullscreen();
+                }
+            }
+        }
+    </script>
+</body>
+</html>
