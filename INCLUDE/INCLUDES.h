@@ -65,8 +65,12 @@
 #include "../INCLUDE/MCAL/TIMER/TIMER_CFG.h"
 
 
+#include "../INCLUDE/TIMER.h"
+#include "../INCLUDE/POMODORRO.h"
 
 
+#include "SET.h"
+#include "Timer.h"
 
 
 

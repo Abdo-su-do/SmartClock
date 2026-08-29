@@ -54,8 +54,8 @@ typedef enum
 
 typedef enum
 {
-	LCD_MODE_12_HOUR = 0,
-	LCD_MODE_24_HOUR
+	LCD_MODE_24_HOUR=0,
+	LCD_MODE_12_HOUR 
 } LCD_CLOCK_MODE;
 
 typedef enum
@@ -79,8 +79,9 @@ typedef enum
 
 typedef enum
 {
-	LCD_STOPWATCH_OFF = 0,
-	LCD_STOPWATCH_ON
+    LCD_STOPWATCH_OFF = 0,
+    LCD_STOPWATCH_ON,
+    LCD_STOPWATCH_PAUSED
 } LCD_STOPWATCH_STATUS;
 
 typedef enum
@@ -105,5 +106,4 @@ void HLCD_voidDisplayTempHumidity(f32 A_f32TemperatureCelsius,f32 A_f32Humidity,
 void HLCD_voidDisplayPomodoro(u8 A_u8WorkMinutes,u8 A_u8WorkSeconds,u8 A_u8BreakMinutes,u8 A_u8BreakSeconds,LCD_POMODORO_STATUS A_Status);
 void HLCD_voidDisplayStopwatch(u8 A_u8Hours,u8 A_u8Minutes,u8 A_u8Seconds,LCD_STOPWATCH_STATUS A_Status);
 void HLCD_voidDisplayTimer(u8 A_u8Hours, u8 A_u8Minutes, u8 A_u8Seconds, LCD_TIMER_STATUS A_Status);
-
 #endif /* INCLUDE_HAL_LCD_LCD_INTERFACE_H_ */

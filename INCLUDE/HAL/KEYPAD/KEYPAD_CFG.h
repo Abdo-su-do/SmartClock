@@ -9,7 +9,7 @@
 #define INCLUDE_HAL_KEYPAD_KEYPAD_CFG_H_
 
 #define KEYPAD_PRESSED 0
-#define KEY_NOT_PRESSED 'N'
+#define KEY_NOT_PRESSED 'N' //this was 1
 
 #define ROW_NO 4
 #define COL_NO 4

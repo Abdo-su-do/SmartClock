@@ -557,14 +557,29 @@ void HLCD_voidDisplayStopwatch(u8 A_u8Hours,u8 A_u8Minutes,u8 A_u8Seconds,LCD_ST
 	{
 		HLCD_voidSendString((u8 *)"Status: ON          ");
 	}
+	else if (A_Status == LCD_STOPWATCH_PAUSED)
+	{
+		HLCD_voidSendString((u8 *)"Status: PAUSED      ");
+	}
 	else
 	{
 		HLCD_voidSendString((u8 *)"Status: OFF         ");
 	}
 
-	/* Line 4: empty */
+	/* Line 4: Instructions */
 	HLCD_voidGoToPos(L4, C1);
-	HLCD_voidSendString((u8 *)"                    ");
+	if (A_Status == LCD_STOPWATCH_ON)
+	{
+		HLCD_voidSendString((u8 *)"/:Pause   =:Reset   ");
+	}
+	else if (A_Status == LCD_STOPWATCH_PAUSED)
+	{
+		HLCD_voidSendString((u8 *)"/:Resume  =:Reset   ");
+	}
+	else
+	{
+		HLCD_voidSendString((u8 *)"/:Start   =:Reset   ");
+	}
 }
 
 /*========================================================

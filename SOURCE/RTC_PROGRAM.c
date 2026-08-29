@@ -1323,3 +1323,70 @@ static u8 RTC_u8ReadRegisters(u8 A_u8StartRegister,u8 *A_pu8Data,u8 A_u8DataLeng
     return 1;
 
 }
+
+void HRTC_voidSetClockMode(RTC_CLOCK_MODE A_enuNewMode)
+{
+    RTC_DATE_TIME Local_strTime;
+
+    HRTC_voidGetTime(&Local_strTime);
+
+    if (Local_strTime.ClockMode == A_enuNewMode)
+    {
+        return;
+    }
+
+    /* Convert from 24-hour mode to 12-hour mode */
+    if (A_enuNewMode == RTC_MODE_12_HOUR)
+    {
+        if (Local_strTime.Hours == 0)
+        {
+            Local_strTime.Hours  = 12;
+            Local_strTime.Period = RTC_AM;
+        }
+        else if (Local_strTime.Hours < 12)
+        {
+            Local_strTime.Period = RTC_AM;
+        }
+        else if (Local_strTime.Hours == 12)
+        {
+            Local_strTime.Period = RTC_PM;
+        }
+        else
+        {
+            Local_strTime.Hours -= 12;
+            Local_strTime.Period = RTC_PM;
+        }
+    }
+
+    /* Convert from 12-hour mode to 24-hour mode */
+    else
+    {
+        if (Local_strTime.Period == RTC_AM)
+        {
+            /* 12 AM becomes 00 */
+            if (Local_strTime.Hours == 12)
+            {
+                Local_strTime.Hours = 0;
+            }
+        }
+        else
+        {
+            /* 1 PM to 11 PM become 13 to 23 */
+            if (Local_strTime.Hours != 12)
+            {
+                Local_strTime.Hours += 12;
+            }
+        }
+
+        Local_strTime.Period = RTC_AM; /* Ignored in 24-hour mode */
+    }
+
+    HRTC_voidSetTime(
+        Local_strTime.Hours,
+        Local_strTime.Minutes,
+        Local_strTime.Seconds,
+        A_enuNewMode,
+        Local_strTime.Period
+    );
+}
+

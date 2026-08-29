@@ -11,6 +11,7 @@
 
 #include "../../lib/STD_TYPES.h"
 
+#define KEY_NOT_PRESSED 'N' //this was edited
 
 #define KEY_NOT_PRESSED 'N'
 
